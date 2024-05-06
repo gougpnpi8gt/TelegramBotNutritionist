@@ -28,8 +28,8 @@ import java.util.Objects;
 public class AnswerMethodFactory {
 
     public SendPhoto getSendPhoto(long chatId,
-                                  String pathPicture,
-                                  String caption
+                                  String pathPicture
+                                  //String caption,
                                   //ReplyKeyboard keyboard
     ){
         File photo = null;
@@ -41,8 +41,26 @@ public class AnswerMethodFactory {
         return SendPhoto.builder()
                 .photo(new InputFile(Objects.requireNonNull(photo)))
                 .chatId(chatId)
-                .caption(caption)
+                //.caption(caption)
                 //.replyMarkup(keyboard)
+                .build();
+    }
+    public SendPhoto getSendPhoto(long chatId,
+                                  String pathPicture,
+                                  String caption,
+                                  ReplyKeyboard keyboard
+    ){
+        File photo = null;
+        try {
+            photo = ResourceUtils.getFile("classpath:" + pathPicture);
+        } catch (FileNotFoundException e) {
+            log.error(e.getMessage());
+        }
+        return SendPhoto.builder()
+                .photo(new InputFile(Objects.requireNonNull(photo)))
+                .chatId(String.valueOf(chatId))
+                .caption(caption)
+                .replyMarkup(keyboard)
                 .build();
     }
 

@@ -17,7 +17,7 @@ import lombok.experimental.FieldDefaults;
 public class ContactInformation {
 
     @Email
-    @NotEmpty(message = "Поле не должно быть пустым")
+   // @NotEmpty(message = "Поле не должно быть пустым")
     @Column(name = "Email")
     String email;
 
@@ -26,8 +26,7 @@ public class ContactInformation {
     String phone;
 
     @Id
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "Person_ID",
-            referencedColumnName = "id")
+    @OneToOne
+    @JoinColumn(name = "Person_ID")
     Person PersonID;
 }

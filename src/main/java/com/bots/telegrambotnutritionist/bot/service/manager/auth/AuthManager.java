@@ -45,7 +45,7 @@ public class AuthManager extends AbstractManager {
     }
 
     @Override
-    public BotApiMethod<?> answerMessage(Message message, Bot bot) {
+    public BotApiMethod<?> answerMessage(Message message, Bot bot) { // реакция на любое сообщение
         Long chatId = message.getChatId();
         var person = personRepository.findById(chatId).orElseThrow();
         person.setAction(Action.AUTH);
@@ -73,17 +73,17 @@ public class AuthManager extends AbstractManager {
         commands.put("start", "Нажмите, чтобы запустить бот");
         commands.put("menu", "Меню");
         commands.put("about", "Обо мне");
-        commands.put("webinars", "Вебинары");
+        commands.put("webinar", "Вебинары");
         commands.put("reviews", "Отзывы");
         commands.put("answer", "Ответы на вопросы");
         commands.put("support", "Сопровождение");
         commands.put("submit", "Оставить заявку");
         if (AUTH_ADMIN.equals(callbackQuery.getData())) { // добавить авторизацию для одного администратора!
+            commands.put("persons", "Вывести всех пользователей");
+            commands.put("supports", "Вывести список заявок на сопровждение");
+            commands.put("webinars", "Вывести список вебинаров");
+            commands.put("sales", "Вывести график продаж");
             try {
-                commands.put("listPerson", "Вывести всех пользователей");
-                commands.put("listSupport", "Вывести список заявок на сопровждение");
-                commands.put("listWebinars", "Вывести список вебинаров");
-                commands.put("sales", "Вывести график продаж");
                 bot.execute(methodFactory.getBotCommandScopeChat(
                         chatId,
                         commands)

@@ -16,15 +16,15 @@ import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.User;
 
-//@Aspect
-//@Order(10) // так как аспекта два, то ставим очередность
-//@Component
+@Aspect
+@Order(10) // так как аспекта два, то ставим очередность
+@Component
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class PersonCreateAspect {
 
     final PersonRepository personRepository;
 
-   // @Autowired
+    @Autowired
     public PersonCreateAspect(PersonRepository personRepository) {
         this.personRepository = personRepository;
     }
@@ -54,16 +54,13 @@ public class PersonCreateAspect {
         if (personRepository.existsById(telegramUser.getId())){
             return joinPoint.proceed();
         }
-//        Person person =
-//                Person.builder()
-//                        .id(telegramUser.getId())
-//                        .name(telegramUser.getUserName())
-//                        .surName(telegramUser.getFirstName())
-//                        .patronymic(telegramUser.getLastName())
-//                        .action(Action.FREE)
-//                        .role(Role.EMPTY)
-//                        .build();
-//        personRepository.save(person);
+        Person person =
+                Person.builder()
+                        .id(telegramUser.getId())
+                        .action(Action.FREE)
+                        .role(Role.EMPTY)
+                        .build();
+        personRepository.save(person);
         return joinPoint.proceed();
     }
 }

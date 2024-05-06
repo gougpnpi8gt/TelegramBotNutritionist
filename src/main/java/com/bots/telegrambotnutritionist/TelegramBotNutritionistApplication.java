@@ -8,7 +8,7 @@ import org.springframework.context.annotation.EnableAspectJAutoProxy;
 
 @SpringBootApplication
 @EnableConfigurationProperties(TelegramProperties.class)
-//@EnableAspectJAutoProxy
+@EnableAspectJAutoProxy
 public class TelegramBotNutritionistApplication {
     public static void main(String[] args) {
         SpringApplication.run(TelegramBotNutritionistApplication.class, args);

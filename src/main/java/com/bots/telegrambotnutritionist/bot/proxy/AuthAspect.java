@@ -17,15 +17,15 @@ import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
-//@Aspect
-//@Component
-//@Order(100)
+@Aspect
+@Component
+@Order(100)
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class AuthAspect {
     final PersonRepository personRepository;
     final AuthManager authManager;
 
-   // @Autowired
+    @Autowired
     public AuthAspect(PersonRepository personRepository,
                       AuthManager authManager) {
         this.personRepository = personRepository;
