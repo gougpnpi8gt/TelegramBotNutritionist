@@ -2,7 +2,6 @@ package com.bots.telegrambotnutritionist.bot.proxy;
 
 import com.bots.telegrambotnutritionist.bot.enity.person.Action;
 import com.bots.telegrambotnutritionist.bot.enity.person.Person;
-import com.bots.telegrambotnutritionist.bot.enity.person.Role;
 import com.bots.telegrambotnutritionist.bot.repository.PersonRepository;
 import com.bots.telegrambotnutritionist.bot.service.manager.auth.AuthManager;
 import com.bots.telegrambotnutritionist.bot.telegram.Bot;
@@ -19,7 +18,7 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 
 @Aspect
 @Component
-@Order(100)
+@Order(30)
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class AuthAspect {
     final PersonRepository personRepository;
@@ -40,7 +39,7 @@ public class AuthAspect {
     public Object authMethodAdvice(ProceedingJoinPoint joinPoint)
             throws Throwable {
         Update update = (Update) joinPoint.getArgs()[0];
-        Person person; // наш пользователь из репозитория
+        Person person;
         if (update.hasMessage()) {
             person = personRepository.findById(update.getMessage().getChatId()).orElseThrow();
         } else if (update.hasCallbackQuery()) {
@@ -48,10 +47,10 @@ public class AuthAspect {
         } else {
             return joinPoint.proceed();
         }
-        if (person.getRole() != Role.EMPTY) {
-            return joinPoint.proceed();
-        }
-        if (person.getAction() == Action.AUTH) {
+//        if (person.getAction() == Action.AUTH) {
+//            return joinPoint.proceed();
+//        }
+        if (person.getId() > 0){
             return joinPoint.proceed();
         }
         return authManager.answerMessage(update.getMessage(),

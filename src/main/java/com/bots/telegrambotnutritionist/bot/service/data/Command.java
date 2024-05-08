@@ -10,6 +10,8 @@ public class Command {
     public static final String SUPPORT = "/support";
     public static final String SUBMIT = "/submit";
 
+    //Admin
+    public static final String ADMIN ="/admin";
     // Пока оставить
     public static final String FEEDBACK_COMMAND = "/feedback";
     public static final String HELP_COMMAND = "/help";

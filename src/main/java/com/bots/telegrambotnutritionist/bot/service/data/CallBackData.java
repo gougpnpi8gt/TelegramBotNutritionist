@@ -6,7 +6,7 @@ public class CallBackData {
      */
     public static final String START = "start";
     public static final String MENU = "menu";
-    public static final String ABOUT = "about_me";
+    public static final String ABOUT = "about";
     public static final String WEBINARS = "webinars";
     public static final String REVIEWS = "reviews";
     public static final String ANSWER = "answer_on_questions";
@@ -15,10 +15,14 @@ public class CallBackData {
     /*
     Авторизация
      */
-    public static final String  AUTH_CLIENT = "auth_client";
-    public static final String  AUTH_ADMIN = "auth_admin";
     public static final String  AUTH = "auth";
-
+    /*
+    Авторизация
+    */
+    public static final String ADD_COMMAND = "auth";
+    public static final String DELETE_COMMAND = "auth";
+    public static final String UPDATE_COMMAND = "auth";
+    public static final String ADMIN = "admin";
     /*
     CallBackData - для работы с расписанием
      */

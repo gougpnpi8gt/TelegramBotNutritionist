@@ -39,7 +39,7 @@ public class StartManager extends AbstractManager {
         try{
             bot.execute(methodFactory.getSendPhoto(
                     chatId,
-                    "\\static\\pictures\\Катя.jpg"
+                    "\\static\\pictures\\Example.jpg"
 //                    """
 //                            Привет, я Екатерина Шевченко.
 //                            В этом боте вы узнаете обо мне, моих курсах и отзывах.
@@ -77,7 +77,7 @@ public class StartManager extends AbstractManager {
         Long chatId = callbackQuery.getMessage().getChatId();
         SendPhoto sendPhoto = methodFactory.getSendPhoto(
                 chatId,
-                "\\static\\pictures\\Катя.jpg"
+                "\\static\\pictures\\Example.jpg"
 //                """
 //                        Привет, я Екатерина Шевченко.
 //                        В этом боте вы узнаете обо мне, моих курсах и отзывах.
@@ -96,7 +96,7 @@ public class StartManager extends AbstractManager {
 //        try{
 //            bot.execute(methodFactory.getSendPhoto(
 //                    callbackQuery.getMessage().getChatId(),
-//                    "\\static\\pictures\\Катя.jpg",
+//                    "\\static\\pictures\\Example.jpg",
 //                    """
 //                            Привет, я Екатерина Шевченко.
 //                            В этом боте вы узнаете обо мне, моих курсах и отзывах.

@@ -1,6 +1,7 @@
 package com.bots.telegrambotnutritionist.bot.service.handler;
 
 import com.bots.telegrambotnutritionist.bot.service.manager.aboutMe.AboutMeManager;
+import com.bots.telegrambotnutritionist.bot.service.manager.admin.AdminManager;
 import com.bots.telegrambotnutritionist.bot.service.manager.menu.MenuManager;
 import com.bots.telegrambotnutritionist.bot.service.manager.review.ReviewManager;
 import com.bots.telegrambotnutritionist.bot.service.manager.support.SupportManager;
@@ -26,6 +27,7 @@ public class CommandHandler {
     final WebinarManager webinarManager;
     final AboutMeManager aboutMeManager;
     final MenuManager menuManager;
+    final AdminManager adminManager;
 
 
     @Autowired
@@ -34,7 +36,8 @@ public class CommandHandler {
                           ReviewManager reviewManager,
                           WebinarManager webinarManager,
                           AboutMeManager aboutMeManager,
-                          MenuManager menuManager
+                          MenuManager menuManager,
+                          AdminManager adminManager
     ) {
         this.startManager = startManager;
         this.reviewManager = reviewManager;
@@ -42,6 +45,7 @@ public class CommandHandler {
         this.aboutMeManager = aboutMeManager;
         this.menuManager = menuManager;
         this.supportManager = supportManager;
+        this.adminManager = adminManager;
     }
 
     public BotApiMethod<?> answer(Message message, Bot bot) {
@@ -61,6 +65,9 @@ public class CommandHandler {
             }
             case ABOUT -> {
                 return aboutMeManager.answerCommand(message, bot);
+            }
+            case ADMIN -> {
+                return adminManager.answerCommand(message, bot);
             }
             default -> {
                 return defaultAnswer(message);
