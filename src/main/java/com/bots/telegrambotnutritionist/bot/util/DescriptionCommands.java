@@ -12,7 +12,7 @@ import java.util.Map;
 
 @Component
 public class DescriptionCommands {
-    private TextInformation textInformation;
+    private final TextInformation textInformation;
 
     @Autowired
     public DescriptionCommands(TextInformation textInformation) {
@@ -35,7 +35,8 @@ public class DescriptionCommands {
 
     public Map<String, String> builtFirstCommand() {
         Map<String, String> commands = new HashMap<>();
-        for (TextMenu textMenu : getMenuList()) {
+        List<TextMenu> list = getMenuList();
+        for (TextMenu textMenu : list) {
             commands.put(textMenu.getKeyInfo(), textMenu.getTextInfo());
         }
         return commands;
@@ -57,12 +58,12 @@ public class DescriptionCommands {
 
     public Map<String, String> adminCommands() {
         List<TextMenu> list = textInformation.findAll();
+        textInformation.deleteAll();
         list.add(new TextMenu("ListPersons", "выводит список пользователей"));
         list.add(new TextMenu("ListSupports", "выводит список заявок на сопровождение"));
         list.add(new TextMenu("ListWebinars", "выводит список вебинаров"));
         list.add(new TextMenu("ListPricesWebinars", "выводит список цен вебинаров"));
         list.add(new TextMenu("Sales", "график продаж"));
-        textInformation.deleteAll();
         textInformation.saveAll(list);
         Map<String, String> commands = new HashMap<>();
         for (TextMenu textMenu : list) {

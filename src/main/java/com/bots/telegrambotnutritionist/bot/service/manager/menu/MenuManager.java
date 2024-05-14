@@ -10,18 +10,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
-import org.telegram.telegrambots.meta.api.methods.PartialBotApiMethod;
-import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
-import org.telegram.telegrambots.meta.api.objects.InputFile;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.List;
+import java.util.Objects;
 
 import static com.bots.telegrambotnutritionist.bot.service.data.CallBackData.*;
 
@@ -39,30 +33,30 @@ public class MenuManager extends AbstractManager {
     }
     @Override
     public BotApiMethod<?> answerCommand(Message message, Bot bot) {
+        Message message1 = null;
         try {
-            return (BotApiMethod<?>) getPhoto(message);
-        } catch (FileNotFoundException e) {
+             message1 = bot.execute(methodFactory.getSendPhoto(
+                            message.getChatId(),
+                            "\\static\\pictures\\Катя.jpg",
+                     "",
+                            null
+                    )
+            );
+        } catch (TelegramApiException e) {
             log.error(e.getMessage());
         }
-        return null;
-    }
-
-    private PartialBotApiMethod<?> getPhoto(Message message) throws FileNotFoundException {
-        SendPhoto sendPhoto = new SendPhoto();
-        String path = "D:\\Projects\\TelegramBotNutritionist\\src\\main\\resources\\static\\pictures\\Example.jpg";
-        InputStream stream = new FileInputStream(path);
-        sendPhoto.setChatId(message.getChatId());
-        sendPhoto.setPhoto(new InputFile(stream, "Example.jpg"));
-        sendPhoto.setCaption("""
-                Привет, я Екатерина Шевченко.
-                В этом боте вы узнаете обо мне, моих курсах и отзывах.
-                """);
-        sendPhoto.setReplyMarkup(keyboardFactory.getInlineKeyboard(
-                List.of("Обо мне", "Сопровождение", "Вебинары", "\uD83D\uDCE1 Отзывы"),
-                List.of(1, 1, 1, 1),
-                List.of(ABOUT, SUPPORT, WEBINARS, REVIEWS)
-        ));
-        return sendPhoto;
+        return methodFactory.getSendMessage(
+                Objects.requireNonNull(message1).getChatId(),
+                """
+                        Привет, я Екатерина Шевченко.
+                        В этом боте вы узнаете обо мне, моих курсах и отзывах.
+                        """,
+                keyboardFactory.getInlineKeyboard(
+                        List.of("Обо мне", "Сопровождение", "Вебинары", "\uD83D\uDCE1 Отзывы"),
+                        List.of(2, 2),
+                        List.of(ABOUT, SUPPORT, WEBINARS, REVIEWS)
+                )
+        );
     }
 
     @Override
@@ -74,22 +68,23 @@ public class MenuManager extends AbstractManager {
     public BotApiMethod<?> answerCallbackQuery(CallbackQuery callbackQuery, Bot bot) {
         Message message = null;
         try {
-            message = bot.execute(methodFactory.getSendPhoto(
-                    callbackQuery.getMessage().getChatId(),
-                    "\\static\\pictures\\Example.jpg",
-                    """
-                            Привет, я Екатерина Шевченко.
-                            В этом боте вы узнаете обо мне, моих курсах и отзывах.
-                             """,
+             message = (Message) bot.execute(methodFactory.getEditMessageMedia(
+                    callbackQuery,
+                    "\\static\\pictures\\Катя.jpg",
                     keyboardFactory.getInlineKeyboard(
                             List.of("Обо мне", "Сопровождение", "Вебинары", "\uD83D\uDCE1 Отзывы"),
-                            List.of(2, 2),
+                            List.of(1, 1, 1, 1),
                             List.of(ABOUT, SUPPORT, WEBINARS, REVIEWS)
                     )
             ));
-        } catch (Exception e) {
+        } catch (TelegramApiException e) {
             log.error(e.getMessage());
+            System.out.println(e.getMessage());
         }
-        return null;
+        return methodFactory.getSendMessage(
+                message.getChatId(),
+                message.getCaption(),
+                message.getReplyMarkup()
+        );
     }
 }

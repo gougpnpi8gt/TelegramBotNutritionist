@@ -2,8 +2,8 @@ package com.bots.telegrambotnutritionist.bot.proxy;
 
 import com.bots.telegrambotnutritionist.bot.enity.person.Action;
 import com.bots.telegrambotnutritionist.bot.enity.person.Person;
+import com.bots.telegrambotnutritionist.bot.enity.person.Role;
 import com.bots.telegrambotnutritionist.bot.repository.PersonRepository;
-import com.bots.telegrambotnutritionist.bot.util.DescriptionCommands;
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -51,6 +51,7 @@ public class PersonCreateAspect {
                 Person.builder()
                         .id(telegramUser.getId())
                         .action(Action.FREE)
+                        .role(Role.EMPTY)
                         .build();
         personRepository.save(person);
         return joinPoint.proceed();

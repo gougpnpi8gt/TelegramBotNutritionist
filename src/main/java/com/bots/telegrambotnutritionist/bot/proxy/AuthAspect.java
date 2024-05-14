@@ -2,6 +2,7 @@ package com.bots.telegrambotnutritionist.bot.proxy;
 
 import com.bots.telegrambotnutritionist.bot.enity.person.Action;
 import com.bots.telegrambotnutritionist.bot.enity.person.Person;
+import com.bots.telegrambotnutritionist.bot.enity.person.Role;
 import com.bots.telegrambotnutritionist.bot.repository.PersonRepository;
 import com.bots.telegrambotnutritionist.bot.service.manager.auth.AuthManager;
 import com.bots.telegrambotnutritionist.bot.telegram.Bot;
@@ -18,7 +19,7 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 
 @Aspect
 @Component
-@Order(30)
+@Order(100)
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class AuthAspect {
     final PersonRepository personRepository;
@@ -47,10 +48,10 @@ public class AuthAspect {
         } else {
             return joinPoint.proceed();
         }
-//        if (person.getAction() == Action.AUTH) {
-//            return joinPoint.proceed();
-//        }
-        if (person.getId() > 0){
+        if (person.getRole() != Role.EMPTY) {
+            return joinPoint.proceed();
+        }
+        if (person.getAction() == Action.AUTH) {
             return joinPoint.proceed();
         }
         return authManager.answerMessage(update.getMessage(),

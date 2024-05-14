@@ -5,7 +5,6 @@ import com.bots.telegrambotnutritionist.bot.service.manager.admin.AdminManager;
 import com.bots.telegrambotnutritionist.bot.service.manager.menu.MenuManager;
 import com.bots.telegrambotnutritionist.bot.service.manager.review.ReviewManager;
 import com.bots.telegrambotnutritionist.bot.service.manager.support.SupportManager;
-import com.bots.telegrambotnutritionist.bot.service.manager.start.StartManager;
 import com.bots.telegrambotnutritionist.bot.service.manager.webinars.WebinarManager;
 import com.bots.telegrambotnutritionist.bot.telegram.Bot;
 import lombok.AccessLevel;
@@ -21,7 +20,6 @@ import static com.bots.telegrambotnutritionist.bot.service.data.Command.*;
 @Service
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class CommandHandler {
-    final StartManager startManager;
     final SupportManager supportManager;
     final ReviewManager reviewManager;
     final WebinarManager webinarManager;
@@ -31,15 +29,13 @@ public class CommandHandler {
 
 
     @Autowired
-    public CommandHandler(StartManager startManager,
-                          SupportManager supportManager,
+    public CommandHandler(SupportManager supportManager,
                           ReviewManager reviewManager,
                           WebinarManager webinarManager,
                           AboutMeManager aboutMeManager,
                           MenuManager menuManager,
                           AdminManager adminManager
     ) {
-        this.startManager = startManager;
         this.reviewManager = reviewManager;
         this.webinarManager = webinarManager;
         this.aboutMeManager = aboutMeManager;
@@ -51,10 +47,7 @@ public class CommandHandler {
     public BotApiMethod<?> answer(Message message, Bot bot) {
         String command = message.getText();
         switch (command) {
-            case START -> {
-                return startManager.answerCommand(message, bot);
-            }
-            case MENU -> {
+            case MENU, START -> {
                 return menuManager.answerCommand(message, bot);
             }
             case SUPPORT -> {

@@ -5,6 +5,9 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.ResourceUtils;
 import org.telegram.telegrambots.meta.api.methods.AnswerCallbackQuery;
 import org.telegram.telegrambots.meta.api.methods.CopyMessage;
+import org.telegram.telegrambots.meta.api.methods.*;
+import org.telegram.telegrambots.meta.api.methods.commands.DeleteMyCommands;
+import org.telegram.telegrambots.meta.api.methods.commands.GetMyCommands;
 import org.telegram.telegrambots.meta.api.methods.commands.SetMyCommands;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
@@ -13,11 +16,13 @@ import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.InputFile;
 import org.telegram.telegrambots.meta.api.objects.commands.BotCommand;
 import org.telegram.telegrambots.meta.api.objects.commands.scope.BotCommandScopeChat;
+import org.telegram.telegrambots.meta.api.objects.media.InputMediaPhoto;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -28,24 +33,6 @@ import java.util.Objects;
 public class AnswerMethodFactory {
 
     public SendPhoto getSendPhoto(long chatId,
-                                  String pathPicture
-                                  //String caption,
-                                  //ReplyKeyboard keyboard
-    ){
-        File photo = null;
-        try {
-            photo = ResourceUtils.getFile("classpath:" + pathPicture);
-        } catch (FileNotFoundException e) {
-            log.error(e.getMessage());
-        }
-        return SendPhoto.builder()
-                .photo(new InputFile(Objects.requireNonNull(photo)))
-                .chatId(chatId)
-                //.caption(caption)
-                //.replyMarkup(keyboard)
-                .build();
-    }
-    public SendPhoto getSendPhoto(long chatId,
                                   String pathPicture,
                                   String caption,
                                   ReplyKeyboard keyboard
@@ -54,11 +41,13 @@ public class AnswerMethodFactory {
         try {
             photo = ResourceUtils.getFile("classpath:" + pathPicture);
         } catch (FileNotFoundException e) {
-            log.error(e.getMessage());
+            String error = e.getMessage();
+            log.error(error);
+            System.out.println(error);
         }
         return SendPhoto.builder()
                 .photo(new InputFile(Objects.requireNonNull(photo)))
-                .chatId(String.valueOf(chatId))
+                .chatId(chatId)
                 .caption(caption)
                 .replyMarkup(keyboard)
                 .build();
@@ -91,6 +80,19 @@ public class AnswerMethodFactory {
                 .build();
     }
 
+
+    public EditMessageMedia getEditMessageMedia(CallbackQuery callbackQuery,
+                                                String pathImage,
+                                                InlineKeyboardMarkup keyboard){
+        InputStream inputStream = getClass().getResourceAsStream(pathImage);
+        InputMediaPhoto mediaPhoto = new InputMediaPhoto();
+        mediaPhoto.setMedia(inputStream, "Катя.jpg");
+        return EditMessageMedia.builder()
+                .chatId(callbackQuery.getMessage().getChatId())
+                .media(mediaPhoto)
+                .replyMarkup(keyboard)
+                .build();
+    }
     public EditMessageText getEditeMessageText(Long chatId,
                                                Integer messageId,
                                                String text) {
@@ -155,7 +157,12 @@ public class AnswerMethodFactory {
                 .text(text)
                 .build();
     }
-
+    public DeleteMyCommands getDeleteMyCommand(){
+        return null;
+    }
+     public GetMyCommands getMyCommands(){
+        return new GetMyCommands();
+     }
     public SetMyCommands getBotCommandScopeChat(Long chatId,
                                                 Map<String, String> commands) {
         List<BotCommand> botCommands = new ArrayList<>();

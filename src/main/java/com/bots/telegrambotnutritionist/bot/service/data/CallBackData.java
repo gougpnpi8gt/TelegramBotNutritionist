@@ -16,6 +16,8 @@ public class CallBackData {
     Авторизация
      */
     public static final String  AUTH = "auth";
+    public static final String  AUTH_ADMIN = "auth_admin";
+    public static final String  AUTH_CLIENT = "auth_client";
     /*
     Авторизация
     */

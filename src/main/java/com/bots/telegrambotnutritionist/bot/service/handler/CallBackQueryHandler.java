@@ -5,7 +5,6 @@ import com.bots.telegrambotnutritionist.bot.service.manager.auth.AuthManager;
 import com.bots.telegrambotnutritionist.bot.service.manager.menu.MenuManager;
 import com.bots.telegrambotnutritionist.bot.service.manager.review.ReviewManager;
 import com.bots.telegrambotnutritionist.bot.service.manager.support.SupportManager;
-import com.bots.telegrambotnutritionist.bot.service.manager.start.StartManager;
 import com.bots.telegrambotnutritionist.bot.service.manager.webinars.WebinarManager;
 import com.bots.telegrambotnutritionist.bot.telegram.Bot;
 import lombok.AccessLevel;
@@ -22,7 +21,6 @@ import static com.bots.telegrambotnutritionist.bot.service.data.CallBackData.*;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class CallBackQueryHandler {
     final AuthManager authManager;
-    final StartManager startManager;
     final SupportManager supportManager;
     final AboutMeManager aboutMe;
     final WebinarManager webinarManager;
@@ -32,7 +30,6 @@ public class CallBackQueryHandler {
 
     @Autowired
     public CallBackQueryHandler(AuthManager authManager,
-                                StartManager startManager,
                                 SupportManager supportManager,
                                 AboutMeManager aboutMe,
                                 WebinarManager webinarManager,
@@ -40,7 +37,6 @@ public class CallBackQueryHandler {
                                 MenuManager menuManager
     ) {
         this.authManager = authManager;
-        this.startManager = startManager;
         this.supportManager = supportManager;
         this.aboutMe = aboutMe;
         this.webinarManager = webinarManager;
@@ -57,10 +53,7 @@ public class CallBackQueryHandler {
             }
         }
         switch (callbackData) {
-            case START -> {
-                return startManager.answerCallbackQuery(callBackQuery, bot);
-            }
-            case MENU -> {
+            case MENU, START -> {
                 return menuManager.answerCallbackQuery(callBackQuery, bot);
             }
             case ABOUT -> {
