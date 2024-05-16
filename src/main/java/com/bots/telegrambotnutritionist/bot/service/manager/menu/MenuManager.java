@@ -57,7 +57,22 @@ public class MenuManager extends AbstractManager {
                         List.of(ABOUT, SUPPORT, WEBINARS, REVIEWS)
                 )
         );
+//        return (BotApiMethod<?>) methodFactory.getSendPhoto(
+//                message.getChatId(),
+//                "\\static\\pictures\\Катя.jpg",
+//                """
+//                        Привет, я Екатерина Шевченко.
+//                        В этом боте вы узнаете обо мне, моих курсах и отзывах.
+//                        """,
+//                keyboardFactory.getInlineKeyboard(
+//                        List.of("Обо мне", "Сопровождение", "Вебинары", "\uD83D\uDCE1 Отзывы"),
+//                        List.of(2, 2),
+//                        List.of(ABOUT, SUPPORT, WEBINARS, REVIEWS)
+//                )
+//        );
+
     }
+
 
     @Override
     public BotApiMethod<?> answerMessage(Message message, Bot bot) {
@@ -68,7 +83,7 @@ public class MenuManager extends AbstractManager {
     public BotApiMethod<?> answerCallbackQuery(CallbackQuery callbackQuery, Bot bot) {
         Message message = null;
         try {
-             message = (Message) bot.execute(methodFactory.getEditMessageMedia(
+             message = (Message) bot.execute(methodFactory.getEditMessagePhoto(
                     callbackQuery,
                     "\\static\\pictures\\Катя.jpg",
                     keyboardFactory.getInlineKeyboard(
@@ -83,7 +98,10 @@ public class MenuManager extends AbstractManager {
         }
         return methodFactory.getSendMessage(
                 message.getChatId(),
-                message.getCaption(),
+                        """
+                        Привет, я Екатерина Шевченко.
+                        В этом боте вы узнаете обо мне, моих курсах и отзывах.
+                        """,
                 message.getReplyMarkup()
         );
     }

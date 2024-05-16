@@ -30,7 +30,7 @@ public class AboutMeManager extends AbstractManager {
     }
 
     @Override
-    public BotApiMethod<?>  answerCommand(Message message, Bot bot) {
+    public BotApiMethod<?> answerCommand(Message message, Bot bot) {
         return methodFactory.getSendMessage(
                 message.getChatId(),
                 """

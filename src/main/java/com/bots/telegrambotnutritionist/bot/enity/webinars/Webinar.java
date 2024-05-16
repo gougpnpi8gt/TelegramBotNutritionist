@@ -7,18 +7,18 @@ import lombok.Setter;
 import lombok.experimental.FieldDefaults;
 
 import java.util.UUID;
-//@Getter
-//@Setter
-//@FieldDefaults(level = AccessLevel.PRIVATE)
-//@Table(name = "Webinars")
-//@Entity
+@Getter
+@Setter
+@FieldDefaults(level = AccessLevel.PRIVATE)
+@Table(name = "Webinars")
+@Entity
 public class Webinar {
 
-//    @Id
-//    @Column(name = "Webinar_ID")
-//    @GeneratedValue(strategy = GenerationType.IDENTITY)
-//    UUID id;
-//
-//    @Column(name = "Value")
-//    String value;
+    @Id
+    @Column(name = "Webinar_ID")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    Integer id;
+
+    @Column(name = "name")
+    String name;
 }

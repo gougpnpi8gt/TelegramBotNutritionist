@@ -18,6 +18,12 @@ public class CallBackData {
     public static final String  AUTH = "auth";
     public static final String  AUTH_ADMIN = "auth_admin";
     public static final String  AUTH_CLIENT = "auth_client";
+
+    /*
+    Вебинары
+     */
+    public static final String  PREV = "prev";
+    public static final String  NEXT = "next";
     /*
     Авторизация
     */

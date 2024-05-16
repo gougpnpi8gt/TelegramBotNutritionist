@@ -5,18 +5,23 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.ResourceUtils;
 import org.telegram.telegrambots.meta.api.methods.AnswerCallbackQuery;
 import org.telegram.telegrambots.meta.api.methods.CopyMessage;
-import org.telegram.telegrambots.meta.api.methods.*;
+import org.telegram.telegrambots.meta.api.methods.PartialBotApiMethod;
 import org.telegram.telegrambots.meta.api.methods.commands.DeleteMyCommands;
 import org.telegram.telegrambots.meta.api.methods.commands.GetMyCommands;
 import org.telegram.telegrambots.meta.api.methods.commands.SetMyCommands;
+import org.telegram.telegrambots.meta.api.methods.send.SendMediaGroup;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
+import org.telegram.telegrambots.meta.api.methods.send.SendVideo;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.*;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.InputFile;
+import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.commands.BotCommand;
 import org.telegram.telegrambots.meta.api.objects.commands.scope.BotCommandScopeChat;
+import org.telegram.telegrambots.meta.api.objects.media.InputMedia;
 import org.telegram.telegrambots.meta.api.objects.media.InputMediaPhoto;
+import org.telegram.telegrambots.meta.api.objects.media.InputMediaVideo;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard;
 
@@ -33,9 +38,9 @@ import java.util.Objects;
 public class AnswerMethodFactory {
 
     public SendPhoto getSendPhoto(long chatId,
-                                  String pathPicture,
-                                  String caption,
-                                  ReplyKeyboard keyboard
+                                            String pathPicture,
+                                            String caption,
+                                            ReplyKeyboard keyboard
     ){
         File photo = null;
         try {
@@ -81,7 +86,7 @@ public class AnswerMethodFactory {
     }
 
 
-    public EditMessageMedia getEditMessageMedia(CallbackQuery callbackQuery,
+    public EditMessageMedia getEditMessagePhoto(CallbackQuery callbackQuery,
                                                 String pathImage,
                                                 InlineKeyboardMarkup keyboard){
         InputStream inputStream = getClass().getResourceAsStream(pathImage);
@@ -182,4 +187,37 @@ public class AnswerMethodFactory {
                 .build();
     }
 
+    public SendMediaGroup getSendMediaGroup(Long chatId){
+        List<InputMedia> medias = new ArrayList<>();
+        File directoryFile = new File("D:\\Projects");
+        File[] files = directoryFile.listFiles();
+        if (files != null) {
+            for (File file : files){
+                if (file.isFile()){
+                    InputMediaVideo video = new InputMediaVideo(file.getAbsolutePath());
+                    medias.add(video);
+                }
+            }
+        }
+        SendMediaGroup mediaGroup = new SendMediaGroup();
+        mediaGroup.setMedias(medias);
+        mediaGroup.setChatId(chatId);
+        mediaGroup.setProtectContent(true);//купил пользователь его или нет
+        return mediaGroup;
+    }
+
+    public SendVideo getSendVideo(Long chatId, String path, ReplyKeyboard keyboard){
+        return SendVideo.builder()
+                .chatId(chatId)
+                .video(new InputFile(new File(path)))
+                .replyMarkup(keyboard)
+                .build();
+    }
+    public EditMessageMedia getEditMessageVideo(CallbackQuery callbackQuery, String path, InlineKeyboardMarkup keyboard){
+        return EditMessageMedia.builder()
+                .chatId(callbackQuery.getMessage().getChatId())
+                .media(new InputMediaVideo(path))
+                .replyMarkup(keyboard)
+                .build();
+    }
 }

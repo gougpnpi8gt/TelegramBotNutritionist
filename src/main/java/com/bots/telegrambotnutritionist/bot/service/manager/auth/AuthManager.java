@@ -3,7 +3,6 @@ package com.bots.telegrambotnutritionist.bot.service.manager.auth;
 import com.bots.telegrambotnutritionist.bot.enity.person.Action;
 import com.bots.telegrambotnutritionist.bot.enity.person.Role;
 import com.bots.telegrambotnutritionist.bot.repository.PersonRepository;
-import com.bots.telegrambotnutritionist.bot.service.data.CallBackData;
 import com.bots.telegrambotnutritionist.bot.service.factory.AnswerMethodFactory;
 import com.bots.telegrambotnutritionist.bot.service.factory.KeyboardFactory;
 import com.bots.telegrambotnutritionist.bot.service.manager.AbstractManager;

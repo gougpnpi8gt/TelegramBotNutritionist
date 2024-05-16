@@ -26,8 +26,6 @@ public class CallBackQueryHandler {
     final WebinarManager webinarManager;
     final ReviewManager reviewManager;
     final MenuManager menuManager;
-
-
     @Autowired
     public CallBackQueryHandler(AuthManager authManager,
                                 SupportManager supportManager,
