@@ -187,29 +187,33 @@ public class AnswerMethodFactory {
                 .build();
     }
 
-    public SendMediaGroup getSendMediaGroup(Long chatId){
+    public SendMediaGroup getSendMediaGroup(Long chatId, List<File> videoFiles){
         List<InputMedia> medias = new ArrayList<>();
-        File directoryFile = new File("D:\\Projects");
-        File[] files = directoryFile.listFiles();
-        if (files != null) {
-            for (File file : files){
-                if (file.isFile()){
-                    InputMediaVideo video = new InputMediaVideo(file.getAbsolutePath());
-                    medias.add(video);
-                }
-            }
+        for (File videoFile : videoFiles) {
+            InputMediaVideo inputMediaVideo = new InputMediaVideo();
+            inputMediaVideo.setMedia(videoFile, videoFile.getName());
+            medias.add(inputMediaVideo);
         }
         SendMediaGroup mediaGroup = new SendMediaGroup();
-        mediaGroup.setMedias(medias);
         mediaGroup.setChatId(chatId);
-        mediaGroup.setProtectContent(true);//купил пользователь его или нет
+        mediaGroup.setMedias(medias);
         return mediaGroup;
     }
 
     public SendVideo getSendVideo(Long chatId, String path, ReplyKeyboard keyboard){
+        File video = null;
+        try {
+            video = ResourceUtils.getFile("classpath:" + path);
+        } catch (FileNotFoundException e) {
+            log.error(e.getMessage());
+        }
         return SendVideo.builder()
                 .chatId(chatId)
-                .video(new InputFile(new File(path)))
+                .video(new InputFile(
+                        //new File(path)
+                        video
+                        )
+                )
                 .replyMarkup(keyboard)
                 .build();
     }

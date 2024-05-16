@@ -1,6 +1,10 @@
 package com.bots.telegrambotnutritionist.bot.service.manager.webinars;
 
 
+import com.bots.telegrambotnutritionist.bot.enity.person.Person;
+import com.bots.telegrambotnutritionist.bot.enity.webinars.Webinar;
+import com.bots.telegrambotnutritionist.bot.repository.PersonRepository;
+import com.bots.telegrambotnutritionist.bot.repository.WebinarRepository;
 import com.bots.telegrambotnutritionist.bot.service.factory.AnswerMethodFactory;
 import com.bots.telegrambotnutritionist.bot.service.factory.KeyboardFactory;
 import com.bots.telegrambotnutritionist.bot.service.manager.AbstractManager;
@@ -15,8 +19,12 @@ import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
+import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static com.bots.telegrambotnutritionist.bot.service.data.CallBackData.*;
 
@@ -26,35 +34,38 @@ import static com.bots.telegrambotnutritionist.bot.service.data.CallBackData.*;
 public class WebinarManager extends AbstractManager {
     final AnswerMethodFactory methodFactory;
     final KeyboardFactory keyboardFactory;
+    final WebinarRepository webinarRepository;
+    final PersonRepository personRepository;
     @Autowired
     public WebinarManager(AnswerMethodFactory methodFactory,
-                        KeyboardFactory keyboardFactory) {
+                          KeyboardFactory keyboardFactory,
+                          WebinarRepository webinarRepository,
+                          PersonRepository personRepository) {
         this.methodFactory = methodFactory;
         this.keyboardFactory = keyboardFactory;
+        this.webinarRepository = webinarRepository;
+        this.personRepository = personRepository;
     }
     @Override
     public BotApiMethod<?> answerCommand(Message message, Bot bot) {
-        List<Message> list = null;
-        try {
-            list = bot.execute(methodFactory.getSendMediaGroup(message.getChatId()));
-        } catch (TelegramApiException e) {
-            log.error(e.getMessage());
+        List<Webinar> list = webinarRepository.findAll();
+        if (list.isEmpty()){
+            getFiles();
+            list = webinarRepository.findAll();
         }
         List<String> text = new ArrayList<>();
         List<Integer> cfg = new ArrayList<>();
         List<String> data = new ArrayList<>();
         int index = 0;
-        if (list != null) {
-            for (Message video : list) {
-                String nameVideo = video.getVideo().getFileName(); //  в каталоге файлы хранятся в виде - Вебинар 1, Вебинар 2 и т.д.
-                text.add(nameVideo);
-                data.add(WEBINARS  + "_" + nameVideo.split(" ")[1]);
-                if (index == 5) {
-                    cfg.add(5);
-                    index = 0;
-                } else {
-                    index += 1;
-                }
+        for (Webinar video : list) {
+            String nameVideo = video.getName();
+            text.add(nameVideo);
+            data.add(WEBINARS + "_" + nameVideo.split(" ")[1]);
+            if (index == 3) {
+                cfg.add(3);
+                index = 0;
+            } else {
+                index += 1;
             }
         }
         if (index != 0) {
@@ -88,24 +99,21 @@ public class WebinarManager extends AbstractManager {
 
     @Override
     public BotApiMethod<?> answerCallbackQuery(CallbackQuery callbackQuery, Bot bot) {
-        String callBackData = callbackQuery.getData();
-        String[] array = callBackData.split("_");
-        List<Message> list = null;
-        try {
-            list = bot.execute(methodFactory.getSendMediaGroup(callbackQuery.getMessage().getChatId()));
-        } catch (TelegramApiException e) {
-            log.error(e.getMessage());
+        List<Webinar> list = webinarRepository.findAll();
+        if (list.isEmpty()){
+            getFiles();
+            list = webinarRepository.findAll();
         }
         List<String> text = new ArrayList<>();
         List<Integer> cfg = new ArrayList<>();
         List<String> data = new ArrayList<>();
         int index = 0;
-        for (Message video : list) {
-            String nameVideo = video.getVideo().getFileName(); //  в каталоге файлы хранятся в виде - Вебинар 1, Вебинар 2 и т.д.
+        for (Webinar video : list) {
+            String nameVideo = video.getName();
             text.add(nameVideo);
-            data.add(WEBINARS  + "_" + nameVideo.split(" ")[1]);
-            if (index == 5) {
-                cfg.add(5);
+            data.add(WEBINARS + "_" + nameVideo.split(" ")[1]);
+            if (index == 3) {
+                cfg.add(3);
                 index = 0;
             } else {
                 index += 1;
@@ -117,17 +125,9 @@ public class WebinarManager extends AbstractManager {
         text.add("Меню");
         cfg.add(1);
         data.add(MENU);
-        switch (callBackData){
-            case NEXT -> {
-                return nextVideo(callbackQuery, bot, callBackData + 1);
-            }
-            case PREV -> {
-                return prevVideo(callbackQuery, bot, callBackData);
-            }
-        }
-        if (array.length > 1){
-            return showWebinar(callbackQuery, bot, callBackData);
-        } else {
+        String callBack = callbackQuery.getData();
+        String[] date = callBack.split("_");
+        if (date.length == 1) {
             return methodFactory.getEditMessageText(
                     callbackQuery,
                     """
@@ -144,57 +144,57 @@ public class WebinarManager extends AbstractManager {
                             data
                     )
             );
-        }
-    }
-
-    private BotApiMethod<?> prevVideo(CallbackQuery callbackQuery, Bot bot, String nameWebinar) {
-        try {
-            bot.execute(methodFactory.getEditMessageVideo(
-                    callbackQuery,
-                    "D:\\Projects\\" + nameWebinar,
-                    keyboardFactory.getInlineKeyboard(
-                            List.of("◀\uFE0F", "▶\uFE0F", "Меню"),
-                            List.of(2, 1),
-                            List.of(PREV, NEXT, MENU)
-                    )
-            ));
-        } catch (TelegramApiException e) {
-            log.error(e.getMessage());
+        } else if (date.length >= 2) {
+            Webinar webinar = webinarRepository.findByName(callBack);
+            switch (date[1]){
+                case "1", "2", "3", "4", "5", "6", "7", "8", "9" ->{
+                    return showWebinar(callbackQuery, bot, webinar);
+                }
+            }
         }
         return null;
     }
 
-    private BotApiMethod<?> nextVideo(CallbackQuery callbackQuery, Bot bot, String nameWebinar) {
-        try {
-            bot.execute(methodFactory.getEditMessageVideo(
-                    callbackQuery,
-                    "D:\\Projects\\" + nameWebinar,
-                    keyboardFactory.getInlineKeyboard(
-                            List.of("◀\uFE0F", "▶\uFE0F", "Меню"),
-                            List.of(2, 1),
-                            List.of(PREV, NEXT, MENU)
-                    )
-            ));
-        } catch (TelegramApiException e) {
-            log.error(e.getMessage());
-        }
-        return null;
+    private List<File> getFiles(){
+        File directoryFile = new File("D:\\Projects");
+        List<File> files = Arrays
+                .stream(directoryFile.listFiles())
+                .filter(File::isFile)
+                .collect(Collectors.toList());
+        webinarRepository.saveAll(files.stream()
+                .map(file -> new Webinar(file.getName().substring(0, 9)))
+                .collect(Collectors.toList()));
+        return files;
     }
-
-    private BotApiMethod<?> showWebinar(CallbackQuery callbackQuery, Bot bot, String nameWebinar) {
-        try {
-             bot.execute(methodFactory.getSendVideo(
-                            callbackQuery.getMessage().getChatId(),
-                            "D:\\Projects\\" + nameWebinar,
-                            keyboardFactory.getInlineKeyboard(
-                                    List.of("◀\uFE0F", "▶\uFE0F", "Меню"),
-                                    List.of(2, 1),
-                                    List.of(PREV, NEXT, MENU)
-                            )
+    private BotApiMethod<?> showWebinar(CallbackQuery callbackQuery, Bot bot, Webinar webinar) {
+        Long chatId = callbackQuery.getMessage().getChatId();
+        if (webinar.isPay()) {
+            try {
+                bot.execute(methodFactory.getSendVideo(
+                                chatId,
+                                //"D:\\Projects\\" + webinar.getName(),
+                                "\\static\\webinars\\" + webinar.getName(),
+                                keyboardFactory.getInlineKeyboard(
+                                        List.of("Открыть полный список вебинаров"),
+                                        List.of(1),
+                                        List.of(WEBINARS)
+                                )
+                        )
+                );
+                return methodFactory.getAnswerCallbackQuery(callbackQuery.getId(), "Вебинар оплачен");
+            } catch (TelegramApiException e) {
+                log.error(e.getMessage());
+            }
+        } else {
+            return methodFactory.getEditMessageText(
+                    callbackQuery,
+                    "Данный вебинар не оплачен, видео не доступно для просмотра",
+                    keyboardFactory.getInlineKeyboard(
+                            List.of( "Открыть полный список вебинаров"),
+                            List.of(1),
+                            List.of( WEBINARS)
                     )
             );
-        } catch (TelegramApiException e) {
-            log.error(e.getMessage());
         }
         return null;
     }

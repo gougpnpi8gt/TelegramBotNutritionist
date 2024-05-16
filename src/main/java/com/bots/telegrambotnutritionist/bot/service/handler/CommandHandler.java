@@ -62,6 +62,9 @@ public class CommandHandler {
             case ADMIN -> {
                 return adminManager.answerCommand(message, bot);
             }
+            case WEBINARS -> {
+                return webinarManager.answerCommand(message, bot);
+            }
             default -> {
                 return defaultAnswer(message);
             }

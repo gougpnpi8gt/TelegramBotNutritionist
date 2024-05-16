@@ -13,7 +13,6 @@ import java.util.UUID;
 @Table(name = "Webinars")
 @Entity
 public class Webinar {
-
     @Id
     @Column(name = "Webinar_ID")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -21,4 +20,14 @@ public class Webinar {
 
     @Column(name = "name")
     String name;
+
+    @Column(name = "is_pay")
+    boolean isPay = false;
+
+    public Webinar(String name) {
+        this.name = name;
+    }
+    public Webinar() {
+
+    }
 }

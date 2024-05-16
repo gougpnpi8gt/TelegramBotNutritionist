@@ -81,28 +81,29 @@ public class MenuManager extends AbstractManager {
 
     @Override
     public BotApiMethod<?> answerCallbackQuery(CallbackQuery callbackQuery, Bot bot) {
-        Message message = null;
+        Message message1 = null;
         try {
-             message = (Message) bot.execute(methodFactory.getEditMessagePhoto(
-                    callbackQuery,
-                    "\\static\\pictures\\Катя.jpg",
-                    keyboardFactory.getInlineKeyboard(
-                            List.of("Обо мне", "Сопровождение", "Вебинары", "\uD83D\uDCE1 Отзывы"),
-                            List.of(1, 1, 1, 1),
-                            List.of(ABOUT, SUPPORT, WEBINARS, REVIEWS)
+            message1 = bot.execute(methodFactory.getSendPhoto(
+                            callbackQuery.getMessage().getChatId(),
+                            "\\static\\pictures\\Катя.jpg",
+                            "",
+                            null
                     )
-            ));
+            );
         } catch (TelegramApiException e) {
             log.error(e.getMessage());
-            System.out.println(e.getMessage());
         }
         return methodFactory.getSendMessage(
-                message.getChatId(),
-                        """
+                Objects.requireNonNull(message1).getChatId(),
+                """
                         Привет, я Екатерина Шевченко.
                         В этом боте вы узнаете обо мне, моих курсах и отзывах.
                         """,
-                message.getReplyMarkup()
+                keyboardFactory.getInlineKeyboard(
+                        List.of("Обо мне", "Сопровождение", "Вебинары", "\uD83D\uDCE1 Отзывы"),
+                        List.of(2, 2),
+                        List.of(ABOUT, SUPPORT, WEBINARS, REVIEWS)
+                )
         );
     }
 }

@@ -14,7 +14,7 @@ import org.telegram.telegrambots.meta.api.objects.Message;
 
 import java.util.List;
 
-import static com.bots.telegrambotnutritionist.bot.service.data.CallBackData.MENU;
+import static com.bots.telegrambotnutritionist.bot.service.data.CallBackData.*;
 
 @Component
 @FieldDefaults(level = AccessLevel.PRIVATE)
@@ -32,14 +32,11 @@ public class ReviewManager extends AbstractManager {
     public BotApiMethod<?> answerCommand(Message message, Bot bot) {
         return methodFactory.getSendMessage(
                 message.getChatId(),
-                """
-                        Пример панели отзыва можно посмотреть
-                           Sign up | Miro | The Visua...  @https://miro.com/ (отзывы)
-                        """,
+                null,
                 keyboardFactory.getInlineKeyboard(
-                        List.of("В меню"),
-                        List.of(1),
-                        List.of(MENU)
+                        List.of("◀\uFE0F", "▶\uFE0F", "В меню"),
+                        List.of(2, 1),
+                        List.of(REVIEWS_PREV, REVIEWS_NEXT, MENU)
                 )
         );
     }
@@ -51,16 +48,20 @@ public class ReviewManager extends AbstractManager {
 
     @Override
     public BotApiMethod<?> answerCallbackQuery(CallbackQuery callbackQuery, Bot bot) {
+        String date = callbackQuery.getData();
+        String[] strings = date.split("_");
+        if (strings.length > 1){
+            switch (strings[1]){
+
+            }
+        }
         return methodFactory.getEditMessageText(
                 callbackQuery,
-                """
-                        Пример панели отзыва можно посмотреть
-                           Sign up | Miro | The Visua...  @https://miro.com/ (отзывы)
-                        """,
+                null,
                 keyboardFactory.getInlineKeyboard(
-                        List.of("В меню"),
-                        List.of(1),
-                        List.of(MENU)
+                        List.of("◀\uFE0F", "▶\uFE0F", "В меню"),
+                        List.of(2, 1),
+                        List.of(REVIEWS_PREV, REVIEWS_NEXT, MENU)
                 )
         );
     }

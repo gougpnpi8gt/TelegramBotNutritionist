@@ -8,7 +8,6 @@ public class CallBackData {
     public static final String MENU = "menu";
     public static final String ABOUT = "about";
     public static final String WEBINARS = "webinars";
-    public static final String REVIEWS = "reviews";
     public static final String ANSWER = "answer_on_questions";
     public static final String SUPPORT = "support";
     public static final String SUBMIT = "submit_application";
@@ -18,12 +17,17 @@ public class CallBackData {
     public static final String  AUTH = "auth";
     public static final String  AUTH_ADMIN = "auth_admin";
     public static final String  AUTH_CLIENT = "auth_client";
-
+    /*
+    Отзывы
+     */
+    public static final String REVIEWS = "reviews";
+    public static final String REVIEWS_PREV = "reviews_prev";
+    public static final String REVIEWS_NEXT = "reviews_next";
     /*
     Вебинары
      */
-    public static final String  PREV = "prev";
-    public static final String  NEXT = "next";
+    public static final String  WEBINARS_PREV = "webinars_prev";
+    public static final String  WEBINARS_NEXT = "webinars_next";
     /*
     Авторизация
     */

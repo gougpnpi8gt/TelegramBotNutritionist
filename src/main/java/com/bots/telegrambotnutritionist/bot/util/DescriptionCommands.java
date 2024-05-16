@@ -24,7 +24,7 @@ public class DescriptionCommands {
         textMenus.add(new TextMenu("start", "Нажмите, чтобы запустить бот"));
         textMenus.add(new TextMenu("menu", "Меню"));
         textMenus.add(new TextMenu("about", "Обо мне"));
-        textMenus.add(new TextMenu("webinar", "Вебинары"));
+        textMenus.add(new TextMenu("webinars", "Вебинары"));
         textMenus.add(new TextMenu("reviews", "Отзывы"));
         textMenus.add(new TextMenu("answer", "Ответы на вопросы"));
         textMenus.add(new TextMenu("support", "Сопровождение"));
