@@ -7,19 +7,27 @@ import lombok.experimental.FieldDefaults;
 
 @Getter
 @Setter
-@Builder
+@FieldDefaults(level = AccessLevel.PRIVATE)
 @NoArgsConstructor
 @AllArgsConstructor
-@FieldDefaults(level = AccessLevel.PRIVATE)
 @Entity
 @Table(name = "Reviews")
 public class Reviews {
 
     @Id
+    @Column(name = "id")
+    Integer id;
+
     @OneToOne
-    @JoinColumn(name = "Person_ID")
+    @JoinColumn(name = "person_id",
+                referencedColumnName = "id")
     Person person;
 
-    @Column(name = "path_picture")
-    String pictureInfo;
+    @Column(name = "description")
+    String description;
+
+    public Reviews(Person person, String text) {
+        this.person = person;
+        this.description = text;
+    }
 }

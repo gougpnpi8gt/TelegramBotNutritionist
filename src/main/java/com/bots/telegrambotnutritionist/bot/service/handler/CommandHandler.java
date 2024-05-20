@@ -4,6 +4,7 @@ import com.bots.telegrambotnutritionist.bot.service.manager.aboutMe.AboutMeManag
 import com.bots.telegrambotnutritionist.bot.service.manager.admin.AdminManager;
 import com.bots.telegrambotnutritionist.bot.service.manager.menu.MenuManager;
 import com.bots.telegrambotnutritionist.bot.service.manager.review.ReviewManager;
+import com.bots.telegrambotnutritionist.bot.service.manager.submit.SubmitManager;
 import com.bots.telegrambotnutritionist.bot.service.manager.support.SupportManager;
 import com.bots.telegrambotnutritionist.bot.service.manager.webinars.WebinarManager;
 import com.bots.telegrambotnutritionist.bot.telegram.Bot;
@@ -26,15 +27,15 @@ public class CommandHandler {
     final AboutMeManager aboutMeManager;
     final MenuManager menuManager;
     final AdminManager adminManager;
-
-
+    final SubmitManager submitManager;
     @Autowired
     public CommandHandler(SupportManager supportManager,
                           ReviewManager reviewManager,
                           WebinarManager webinarManager,
                           AboutMeManager aboutMeManager,
                           MenuManager menuManager,
-                          AdminManager adminManager
+                          AdminManager adminManager,
+                          SubmitManager submitManager
     ) {
         this.reviewManager = reviewManager;
         this.webinarManager = webinarManager;
@@ -42,6 +43,7 @@ public class CommandHandler {
         this.menuManager = menuManager;
         this.supportManager = supportManager;
         this.adminManager = adminManager;
+        this.submitManager = submitManager;
     }
 
     public BotApiMethod<?> answer(Message message, Bot bot) {
@@ -64,6 +66,9 @@ public class CommandHandler {
             }
             case WEBINARS -> {
                 return webinarManager.answerCommand(message, bot);
+            }
+            case SUBMIT -> {
+                return submitManager.answerCommand(message, bot);
             }
             default -> {
                 return defaultAnswer(message);

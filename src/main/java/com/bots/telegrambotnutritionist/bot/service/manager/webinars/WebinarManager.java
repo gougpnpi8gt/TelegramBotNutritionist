@@ -1,9 +1,7 @@
 package com.bots.telegrambotnutritionist.bot.service.manager.webinars;
 
 
-import com.bots.telegrambotnutritionist.bot.enity.person.Person;
 import com.bots.telegrambotnutritionist.bot.enity.webinars.Webinar;
-import com.bots.telegrambotnutritionist.bot.repository.PersonRepository;
 import com.bots.telegrambotnutritionist.bot.repository.WebinarRepository;
 import com.bots.telegrambotnutritionist.bot.service.factory.AnswerMethodFactory;
 import com.bots.telegrambotnutritionist.bot.service.factory.KeyboardFactory;
@@ -23,7 +21,6 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static com.bots.telegrambotnutritionist.bot.service.data.CallBackData.*;
@@ -35,23 +32,28 @@ public class WebinarManager extends AbstractManager {
     final AnswerMethodFactory methodFactory;
     final KeyboardFactory keyboardFactory;
     final WebinarRepository webinarRepository;
-    final PersonRepository personRepository;
     @Autowired
     public WebinarManager(AnswerMethodFactory methodFactory,
                           KeyboardFactory keyboardFactory,
-                          WebinarRepository webinarRepository,
-                          PersonRepository personRepository) {
+                          WebinarRepository webinarRepository) {
         this.methodFactory = methodFactory;
         this.keyboardFactory = keyboardFactory;
         this.webinarRepository = webinarRepository;
-        this.personRepository = personRepository;
     }
     @Override
     public BotApiMethod<?> answerCommand(Message message, Bot bot) {
-        List<Webinar> list = webinarRepository.findAll();
-        if (list.isEmpty()){
-            getFiles();
-            list = webinarRepository.findAll();
+        List<Webinar> list = getFiles();
+        Long chatId = message.getChatId();
+        if (list.isEmpty()) {
+            return methodFactory.getSendMessage(
+                    chatId,
+                    "Вебинаров пока нет",
+                    keyboardFactory.getInlineKeyboard(
+                            List.of("Вернитесь в меню"),
+                            List.of(1),
+                            List.of(MENU)
+                    )
+            );
         }
         List<String> text = new ArrayList<>();
         List<Integer> cfg = new ArrayList<>();
@@ -75,7 +77,7 @@ public class WebinarManager extends AbstractManager {
         cfg.add(1);
         data.add(MENU);
         return methodFactory.getSendMessage(
-                message.getChatId(),
+                chatId,
                 """
                         Вебинары - это интерактивные онлайн-мероприятия, где я, ведущий нутрициолог, делюсь с вами самой актуальной информацией о здоровом питании и образе жизни.
                         Здесь вы узнаете о секретах правильного питания, получите ценные советы по достижению своих здоровых целей.
@@ -91,6 +93,23 @@ public class WebinarManager extends AbstractManager {
                 )
         );
     }
+    private List<Webinar> getFiles(){
+        List<Webinar> webinars = webinarRepository.findAll();
+        if (webinars.isEmpty()) {
+            File directoryFile = new File("D:\\Projects");
+            List<File> files = Arrays
+                    .stream(directoryFile.listFiles())
+                    .filter(File::isFile)
+                    .collect(Collectors.toList());
+            if (!files.isEmpty()) {
+                webinars = files.stream()
+                        .map(file -> new Webinar(file.getName().substring(0, 9)))
+                        .collect(Collectors.toList());
+                webinarRepository.saveAll(webinars);
+            }
+        }
+        return webinars;
+    }
 
     @Override
     public BotApiMethod<?> answerMessage(Message message, Bot bot) {
@@ -99,10 +118,18 @@ public class WebinarManager extends AbstractManager {
 
     @Override
     public BotApiMethod<?> answerCallbackQuery(CallbackQuery callbackQuery, Bot bot) {
-        List<Webinar> list = webinarRepository.findAll();
+        List<Webinar> list = getFiles();
+        Long chatId = callbackQuery.getMessage().getChatId();
         if (list.isEmpty()){
-            getFiles();
-            list = webinarRepository.findAll();
+            return methodFactory.getSendMessage(
+                    chatId,
+                    "Вебинаров пока нет",
+                    keyboardFactory.getInlineKeyboard(
+                            List.of("Вернитесь в меню"),
+                            List.of(1),
+                            List.of(MENU)
+                    )
+            );
         }
         List<String> text = new ArrayList<>();
         List<Integer> cfg = new ArrayList<>();
@@ -155,25 +182,12 @@ public class WebinarManager extends AbstractManager {
         return null;
     }
 
-    private List<File> getFiles(){
-        File directoryFile = new File("D:\\Projects");
-        List<File> files = Arrays
-                .stream(directoryFile.listFiles())
-                .filter(File::isFile)
-                .collect(Collectors.toList());
-        webinarRepository.saveAll(files.stream()
-                .map(file -> new Webinar(file.getName().substring(0, 9)))
-                .collect(Collectors.toList()));
-        return files;
-    }
     private BotApiMethod<?> showWebinar(CallbackQuery callbackQuery, Bot bot, Webinar webinar) {
-        Long chatId = callbackQuery.getMessage().getChatId();
         if (webinar.isPay()) {
             try {
-                bot.execute(methodFactory.getSendVideo(
-                                chatId,
-                                //"D:\\Projects\\" + webinar.getName(),
-                                "\\static\\webinars\\" + webinar.getName(),
+                bot.execute(methodFactory.getEditMessageVideo(
+                                callbackQuery,
+                                "D:\\Projects\\" + webinar.getName(),
                                 keyboardFactory.getInlineKeyboard(
                                         List.of("Открыть полный список вебинаров"),
                                         List.of(1),
@@ -181,7 +195,6 @@ public class WebinarManager extends AbstractManager {
                                 )
                         )
                 );
-                return methodFactory.getAnswerCallbackQuery(callbackQuery.getId(), "Вебинар оплачен");
             } catch (TelegramApiException e) {
                 log.error(e.getMessage());
             }

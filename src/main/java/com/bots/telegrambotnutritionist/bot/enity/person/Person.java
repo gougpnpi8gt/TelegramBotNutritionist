@@ -1,11 +1,12 @@
 package com.bots.telegrambotnutritionist.bot.enity.person;
 
+import com.bots.telegrambotnutritionist.bot.enity.reviews.Reviews;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Getter
 @Setter
@@ -18,8 +19,12 @@ import java.time.LocalDateTime;
 public class Person {
 
     @Id
-    @Column(name = "ID")
-    Long id;
+    @Column(name = "id")
+    Long id; // идентификатор чата для пользователя, по сути он будет одинаковый у всех
+
+    @Column(name = "token",
+            unique = true)
+    String token; // уникальный для каждого человека и его может будет поменять
 
     @Column(name = "Name")
     //@NotEmpty(message = "Имя не должно быть пустым")
@@ -31,7 +36,7 @@ public class Person {
     String surName;
 
     @Column(name = "Patronymic")
-    @Size(min = 2, max = 20, message = "Отчество не больше 20 символов")
+    //@Size(min = 2, max = 20, message = "Отчество не больше 20 символов")
     String patronymic;
 
     @Column(name = "Age")
@@ -50,7 +55,7 @@ public class Person {
     int weight;
 
     @Column(name = "Birthday")
-    @Temporal(TemporalType.TIMESTAMP)
+    //@Temporal(TemporalType.TIMESTAMP)
     LocalDateTime birthday;
 
     @Column(name = "Country")
@@ -68,4 +73,17 @@ public class Person {
 
     @Enumerated(EnumType.STRING)
     Role role;
+
+    @OneToOne(mappedBy = "person")
+    Reviews reviews;
+
+    @PrePersist
+    private void generateUniqueToken() {
+        if (token == null) {
+            token = String.valueOf(UUID.randomUUID());
+        }
+    }
+    public void refreshToken() {
+        token = String.valueOf(UUID.randomUUID());
+    }
 }

@@ -4,6 +4,7 @@ import com.bots.telegrambotnutritionist.bot.service.manager.aboutMe.AboutMeManag
 import com.bots.telegrambotnutritionist.bot.service.manager.auth.AuthManager;
 import com.bots.telegrambotnutritionist.bot.service.manager.menu.MenuManager;
 import com.bots.telegrambotnutritionist.bot.service.manager.review.ReviewManager;
+import com.bots.telegrambotnutritionist.bot.service.manager.submit.SubmitManager;
 import com.bots.telegrambotnutritionist.bot.service.manager.support.SupportManager;
 import com.bots.telegrambotnutritionist.bot.service.manager.webinars.WebinarManager;
 import com.bots.telegrambotnutritionist.bot.telegram.Bot;
@@ -26,13 +27,15 @@ public class CallBackQueryHandler {
     final WebinarManager webinarManager;
     final ReviewManager reviewManager;
     final MenuManager menuManager;
+    final SubmitManager submitManager;
     @Autowired
     public CallBackQueryHandler(AuthManager authManager,
                                 SupportManager supportManager,
                                 AboutMeManager aboutMe,
                                 WebinarManager webinarManager,
                                 ReviewManager reviewManager,
-                                MenuManager menuManager
+                                MenuManager menuManager,
+                                SubmitManager submitManager
     ) {
         this.authManager = authManager;
         this.supportManager = supportManager;
@@ -40,6 +43,7 @@ public class CallBackQueryHandler {
         this.webinarManager = webinarManager;
         this.reviewManager = reviewManager;
         this.menuManager = menuManager;
+        this.submitManager = submitManager;
     }
 
     public BotApiMethod<?> answer(CallbackQuery callBackQuery, Bot bot) {
@@ -48,6 +52,9 @@ public class CallBackQueryHandler {
         switch (keyWord){
             case AUTH -> {
                 return authManager.answerCallbackQuery(callBackQuery, bot);
+            }
+            case REVIEWS -> {
+                return reviewManager.answerCallbackQuery(callBackQuery, bot);
             }
         }
         switch (callbackData) {
@@ -63,8 +70,8 @@ public class CallBackQueryHandler {
             case WEBINARS -> {
                 return webinarManager.answerCallbackQuery(callBackQuery, bot);
             }
-            case REVIEWS -> {
-                return reviewManager.answerCallbackQuery(callBackQuery, bot);
+            case SUBMIT -> {
+                return submitManager.answerCallbackQuery(callBackQuery, bot);
             }
         }
         return null;

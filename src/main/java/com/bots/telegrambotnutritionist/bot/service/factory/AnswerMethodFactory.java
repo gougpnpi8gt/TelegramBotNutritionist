@@ -38,10 +38,10 @@ import java.util.Objects;
 public class AnswerMethodFactory {
 
     public SendPhoto getSendPhoto(long chatId,
-                                            String pathPicture,
-                                            String caption,
-                                            ReplyKeyboard keyboard
-    ){
+                                  String pathPicture,
+                                  String caption,
+                                  ReplyKeyboard keyboard
+    ) {
         File photo = null;
         try {
             photo = ResourceUtils.getFile("classpath:" + pathPicture);
@@ -54,6 +54,17 @@ public class AnswerMethodFactory {
                 .photo(new InputFile(Objects.requireNonNull(photo)))
                 .chatId(chatId)
                 .caption(caption)
+                .replyMarkup(keyboard)
+                .build();
+    }
+
+    public SendPhoto getSendPhoto(long chatId,
+                                  String pathPicture,
+                                  ReplyKeyboard keyboard
+    ) {
+        return SendPhoto.builder()
+                .chatId(chatId)
+                .photo(new InputFile(new File(pathPicture)))
                 .replyMarkup(keyboard)
                 .build();
     }
@@ -91,7 +102,7 @@ public class AnswerMethodFactory {
                                                 InlineKeyboardMarkup keyboard){
         InputStream inputStream = getClass().getResourceAsStream(pathImage);
         InputMediaPhoto mediaPhoto = new InputMediaPhoto();
-        mediaPhoto.setMedia(inputStream, "Катя.jpg");
+        mediaPhoto.setMedia(String.valueOf(inputStream));
         return EditMessageMedia.builder()
                 .chatId(callbackQuery.getMessage().getChatId())
                 .media(mediaPhoto)
@@ -162,12 +173,6 @@ public class AnswerMethodFactory {
                 .text(text)
                 .build();
     }
-    public DeleteMyCommands getDeleteMyCommand(){
-        return null;
-    }
-     public GetMyCommands getMyCommands(){
-        return new GetMyCommands();
-     }
     public SetMyCommands getBotCommandScopeChat(Long chatId,
                                                 Map<String, String> commands) {
         List<BotCommand> botCommands = new ArrayList<>();
@@ -200,20 +205,17 @@ public class AnswerMethodFactory {
         return mediaGroup;
     }
 
-    public SendVideo getSendVideo(Long chatId, String path, ReplyKeyboard keyboard){
-        File video = null;
-        try {
-            video = ResourceUtils.getFile("classpath:" + path);
-        } catch (FileNotFoundException e) {
-            log.error(e.getMessage());
-        }
+    public SendVideo getSendVideo(Long chatId,
+                                  String path,
+                                  String caption,
+                                  ReplyKeyboard keyboard){
         return SendVideo.builder()
                 .chatId(chatId)
                 .video(new InputFile(
-                        //new File(path)
-                        video
+                        new File(path)
                         )
                 )
+                .caption(caption)
                 .replyMarkup(keyboard)
                 .build();
     }

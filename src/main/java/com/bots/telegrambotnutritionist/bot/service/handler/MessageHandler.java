@@ -1,6 +1,8 @@
 package com.bots.telegrambotnutritionist.bot.service.handler;
 
 import com.bots.telegrambotnutritionist.bot.repository.PersonRepository;
+import com.bots.telegrambotnutritionist.bot.service.manager.review.ReviewManager;
+import com.bots.telegrambotnutritionist.bot.service.manager.submit.SubmitManager;
 import com.bots.telegrambotnutritionist.bot.telegram.Bot;
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
@@ -13,29 +15,29 @@ import org.telegram.telegrambots.meta.api.objects.Message;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class MessageHandler {
     final PersonRepository personRepository;
+    final SubmitManager submitManager;
+    final ReviewManager reviewManager;
 
     @Autowired
-    public MessageHandler(
-                          PersonRepository personRepository) {
+    public MessageHandler(PersonRepository personRepository,
+                          SubmitManager submitManager,
+                          ReviewManager reviewManager
+    ) {
         this.personRepository = personRepository;
+        this.submitManager = submitManager;
+        this.reviewManager = reviewManager;
     }
 
     public BotApiMethod<?> answer(Message message, Bot bot) {
-//        var user = personRepository.findUserByChatId(message.getChatId());
-//        switch (user.getAction()) {
-//            case SENDING_TOKEN -> {
-//                return null;
-//            }
-//            case SENDING_DESCRIPTION,
-//                    SENDING_TITTLE -> {
-//                return null;
-//            }
-//            case SENDING_TASK,
-//                    SENDING_MEDIA,
-//                    SENDING_TEXT -> {
-//                return null;
-//            }
-//        }
+        var person = personRepository.findById(message.getChatId()).orElseThrow();
+        switch (person.getAction()) {
+            case SENDING_DATA -> {
+                return submitManager.answerMessage(message, bot);
+            }
+            case SENDING_REVIEW -> {
+                return reviewManager.answerMessage(message, bot);
+            }
+        }
         return null;
     }
 }
