@@ -173,6 +173,13 @@ public class AnswerMethodFactory {
                 .text(text)
                 .build();
     }
+    public DeleteMyCommands getDeleteMyCommands(Long chatId){
+        return DeleteMyCommands.builder()
+                .scope(BotCommandScopeChat.builder()
+                        .chatId(chatId)
+                        .build())
+                .build();
+    }
     public SetMyCommands getBotCommandScopeChat(Long chatId,
                                                 Map<String, String> commands) {
         List<BotCommand> botCommands = new ArrayList<>();

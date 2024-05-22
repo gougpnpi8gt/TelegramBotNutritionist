@@ -1,6 +1,7 @@
 package com.bots.telegrambotnutritionist.bot.service.handler;
 
 import com.bots.telegrambotnutritionist.bot.repository.PersonRepository;
+import com.bots.telegrambotnutritionist.bot.service.manager.editor.EditorManager;
 import com.bots.telegrambotnutritionist.bot.service.manager.review.ReviewManager;
 import com.bots.telegrambotnutritionist.bot.service.manager.submit.SubmitManager;
 import com.bots.telegrambotnutritionist.bot.telegram.Bot;
@@ -17,15 +18,18 @@ public class MessageHandler {
     final PersonRepository personRepository;
     final SubmitManager submitManager;
     final ReviewManager reviewManager;
+    final EditorManager editorManager;
 
     @Autowired
     public MessageHandler(PersonRepository personRepository,
                           SubmitManager submitManager,
-                          ReviewManager reviewManager
+                          ReviewManager reviewManager,
+                          EditorManager editorManager
     ) {
         this.personRepository = personRepository;
         this.submitManager = submitManager;
         this.reviewManager = reviewManager;
+        this.editorManager = editorManager;
     }
 
     public BotApiMethod<?> answer(Message message, Bot bot) {
@@ -36,6 +40,9 @@ public class MessageHandler {
             }
             case SENDING_REVIEW -> {
                 return reviewManager.answerMessage(message, bot);
+            }
+            case ADD_COMMAND, DELETE_COMMAND, UPDATE_COMMAND -> {
+                return editorManager.answerMessage(message, bot);
             }
         }
         return null;

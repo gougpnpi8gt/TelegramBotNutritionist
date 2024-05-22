@@ -11,5 +11,7 @@ public class Command {
     public static final String SUBMIT = "/submit";
     //Admin
     public static final String ADMIN ="/admin";
+    public static final String EDITOR ="/editor";
+
 
 }

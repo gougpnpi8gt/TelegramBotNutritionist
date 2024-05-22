@@ -54,15 +54,6 @@ public class AuthManager extends AbstractManager {
         var person = personRepository.findById(chatId).orElseThrow();
         person.setAction(Action.AUTH);
         personRepository.save(person);
-        Map<String, String> map = commands.builtFirstCommand();
-        try {
-            bot.execute(methodFactory.getBotCommandScopeChat(
-                    chatId,
-                    map)
-            );
-        } catch (TelegramApiException e) {
-            log.error(e.getMessage());
-        }
         return methodFactory.getSendMessage(chatId,
                 "Выбери роль чтобы метод сработал",
                 keyboardFactory.getInlineKeyboard(
@@ -79,7 +70,20 @@ public class AuthManager extends AbstractManager {
         Integer messageId = callbackQuery.getMessage().getMessageId();
         var person = personRepository.findById(chatId).orElseThrow();
         if (AUTH_ADMIN.equals(callbackQuery.getData())) {
+            person.setRole(Role.ADMIN);
             Map<String, String> map = commands.adminCommands();
+            try {
+                //bot.execute(methodFactory.getDeleteMyCommands(chatId));
+                bot.execute(methodFactory.getBotCommandScopeChat(
+                        chatId,
+                        map)
+                );
+            } catch (TelegramApiException e) {
+                log.error(e.getMessage());
+            }
+        } else {
+            person.setRole(Role.CLIENT);
+            Map<String, String> map = commands.builtFirstCommand();
             try {
                 bot.execute(methodFactory.getBotCommandScopeChat(
                         chatId,
@@ -88,17 +92,15 @@ public class AuthManager extends AbstractManager {
             } catch (TelegramApiException e) {
                 log.error(e.getMessage());
             }
-            person.setRole(Role.ADMIN);
-        }
-        else {
-            person.setRole(Role.CLIENT);
         }
         person.setAction(Action.FREE);
+        personRepository.save(person);
         try {
-            bot.execute(methodFactory.getDeleteMessage(chatId, messageId));
+            bot.execute(methodFactory.getAnswerCallbackQuery(callbackQuery.getId(),
+                    "Авторизация прошла успешно"));
         } catch (TelegramApiException e) {
             log.error(e.getMessage());
         }
-        return methodFactory.getAnswerCallbackQuery(callbackQuery.getId(), "Авторизация прошла успешно");
+        return methodFactory.getDeleteMessage(chatId, messageId);
     }
 }

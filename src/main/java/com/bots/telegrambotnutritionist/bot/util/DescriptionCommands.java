@@ -57,7 +57,7 @@ public class DescriptionCommands {
     }
 
     public Map<String, String> adminCommands() {
-        List<TextMenu> list = textInformation.findAll();
+        List<TextMenu> list = getMenuList();;
         textInformation.deleteAll();
         list.add(new TextMenu("ListPersons", "выводит список пользователей"));
         list.add(new TextMenu("ListSupports", "выводит список заявок на сопровождение"));

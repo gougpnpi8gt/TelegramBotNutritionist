@@ -64,7 +64,7 @@ public class ReviewManager extends AbstractManager {
         reviewRepository.save(review);
         person.setAction(Action.FREE);
         personRepository.save(person);
-        return null;
+        return mainMenu(message);
     }
 
     @Override

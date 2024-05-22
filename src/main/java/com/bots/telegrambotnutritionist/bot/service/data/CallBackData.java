@@ -33,10 +33,17 @@ public class CallBackData {
     /*
     Авторизация
     */
-    public static final String ADD_COMMAND = "auth";
-    public static final String DELETE_COMMAND = "auth";
-    public static final String UPDATE_COMMAND = "auth";
+    public static final String COMMAND_ADD = "command_add";
+    public static final String COMMAND_DELETE = "command_delete";
+    public static final String COMMAND_UPDATE = "command_update";
+    public static final String COMMAND_MENU = "command_menu";
+    public static final String COMMAND = "command";
+    /*
+    Меню администратора
+     */
     public static final String ADMIN = "admin";
+    public static final String EDITOR = "editor";
+
     /*
     Заявки
      */

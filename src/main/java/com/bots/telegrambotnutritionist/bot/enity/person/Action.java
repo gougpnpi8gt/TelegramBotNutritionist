@@ -4,5 +4,8 @@ public enum Action {
     FREE,
     SENDING_DATA,
     SENDING_REVIEW,
+    ADD_COMMAND,
+    DELETE_COMMAND,
+    UPDATE_COMMAND,
     AUTH
 }

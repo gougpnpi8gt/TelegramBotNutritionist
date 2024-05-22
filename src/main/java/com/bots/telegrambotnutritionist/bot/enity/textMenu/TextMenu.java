@@ -29,4 +29,9 @@ public class TextMenu {
     public TextMenu(){
 
     }
+
+    @Override
+    public String toString() {
+        return "/" + keyInfo + " - " + textInfo + ";";
+    }
 }

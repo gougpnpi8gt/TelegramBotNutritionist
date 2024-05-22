@@ -20,7 +20,7 @@ public class Person {
 
     @Id
     @Column(name = "id")
-    Long id; // идентификатор чата для пользователя, по сути он будет одинаковый у всех
+    Long id; // идентификатор чата для пользователя
 
     @Column(name = "token",
             unique = true)
