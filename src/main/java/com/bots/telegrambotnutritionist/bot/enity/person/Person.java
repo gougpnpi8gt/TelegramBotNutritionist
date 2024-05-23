@@ -6,6 +6,8 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Getter
@@ -74,14 +76,20 @@ public class Person {
     @Enumerated(EnumType.STRING)
     Role role;
 
-    @OneToOne(mappedBy = "person")
-    Reviews reviews;
+    @OneToMany(mappedBy = "person")
+    List<Reviews> reviews;
 
     @PrePersist
     private void generateUniqueToken() {
         if (token == null) {
             token = String.valueOf(UUID.randomUUID());
         }
+    }
+    public void addReviews(Reviews review) {
+        if (reviews == null) {
+            reviews = new ArrayList<>();
+        }
+        reviews.add(review);
     }
     public void refreshToken() {
         token = String.valueOf(UUID.randomUUID());

@@ -56,8 +56,10 @@ public class EditorManager extends AbstractManager {
             String text = message.getText();
             switch (person.getAction()) {
                 case Action.ADD_COMMAND -> {
-                    String[] command = text.split(" ");
+                    String[] command = text.split("-");
                     descriptionCommands.addCommand(command[0], command[1]);
+                    person.setAction(Action.FREE);
+                    personRepository.save(person);
                     return methodFactory.getSendMessage(chatId,
                             "Команда добавлена",
                             getInlineKeyboardForMainEditor()
@@ -65,24 +67,24 @@ public class EditorManager extends AbstractManager {
                 }
                 case Action.DELETE_COMMAND -> {
                     descriptionCommands.delete(text);
+                    person.setAction(Action.FREE);
+                    personRepository.save(person);
                     return methodFactory.getSendMessage(chatId,
                             "Команда удалена",
                             getInlineKeyboardForMainEditor()
                     );
                 }
                 case Action.UPDATE_COMMAND -> {
-                    String[] command = text.split(" ");
+                    String[] command = text.split("-");
                     descriptionCommands.updateTextCommand(command[0], command[1]);
+                    person.setAction(Action.FREE);
+                    personRepository.save(person);
                     return methodFactory.getSendMessage(chatId,
                             "Команда обновлена",
                             getInlineKeyboardForMainEditor()
                     );
                 }
             }
-            // В каждом ли блоке сохранять человека в репозиторий?
-            person.setAction(Action.FREE);
-            personRepository.save(person);
-            // подумать
         } else {
             return methodFactory.getSendMessage(chatId,
                     "Сообщение не содержит текст, напишите снова пожалуйста",
@@ -125,12 +127,7 @@ public class EditorManager extends AbstractManager {
                 """
                         Меню редактирования команд
                         """,
-                keyboardFactory.getInlineKeyboard(
-                        List.of("Добавить команду", "Удалить команду",
-                                "Обновить описание команды", "Вернуться обратно в меню"),
-                        List.of(2, 1, 1),
-                        List.of(COMMAND_ADD, COMMAND_DELETE, COMMAND_UPDATE, MENU)
-                )
+                getKeyboardMainMenu()
         );
     }
 
@@ -140,12 +137,15 @@ public class EditorManager extends AbstractManager {
                 """
                         Меню редактирования команд
                         """,
-                keyboardFactory.getInlineKeyboard(
-                        List.of("Добавить команду", "Удалить команду",
-                                "Обновить описание команды", "Вернуться обратно в меню"),
-                        List.of(2, 1, 1),
-                        List.of(COMMAND_ADD, COMMAND_DELETE, COMMAND_UPDATE, MENU)
-                )
+                getKeyboardMainMenu()
+        );
+    }
+    private InlineKeyboardMarkup getKeyboardMainMenu(){
+        return keyboardFactory.getInlineKeyboard(
+                List.of("Добавить команду", "Удалить команду",
+                        "Обновить описание команды", "Вернуться обратно в меню"),
+                List.of(2, 1, 1),
+                List.of(COMMAND_ADD, COMMAND_DELETE, COMMAND_UPDATE, MENU)
         );
     }
 
@@ -163,7 +163,9 @@ public class EditorManager extends AbstractManager {
             person.setAction(Action.UPDATE_COMMAND);
             personRepository.save(person);
             return methodFactory.getEditMessageText(callbackQuery,
-                    "Какую команду вы желаете заменить?", null);
+                    "Какую команду вы желаете заменить? \n " +
+                            "Напишите название существующей команды и через '-' написать её описание",
+                    null);
         } else {
             return getNoRights(callbackQuery);
         }

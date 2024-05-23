@@ -1,6 +1,7 @@
 package com.bots.telegrambotnutritionist.bot.service.manager.auth;
 
 import com.bots.telegrambotnutritionist.bot.enity.person.Action;
+import com.bots.telegrambotnutritionist.bot.enity.person.Person;
 import com.bots.telegrambotnutritionist.bot.enity.person.Role;
 import com.bots.telegrambotnutritionist.bot.repository.PersonRepository;
 import com.bots.telegrambotnutritionist.bot.service.factory.AnswerMethodFactory;
@@ -53,15 +54,23 @@ public class AuthManager extends AbstractManager {
         Long chatId = message.getChatId();
         var person = personRepository.findById(chatId).orElseThrow();
         person.setAction(Action.AUTH);
+        person.setRole(Role.CLIENT);
+        String profile = getFirstProfile(person);
         personRepository.save(person);
         return methodFactory.getSendMessage(chatId,
-                "Выбери роль чтобы метод сработал",
+                profile,
                 keyboardFactory.getInlineKeyboard(
-                        List.of("Администратор", "Клиент"),
-                        List.of(1, 1),
-                        List.of(AUTH_ADMIN, AUTH_CLIENT)
+                        List.of("Нажмите кнопку, чтобы добавить меню"),
+                        List.of( 1),
+                        List.of(AUTH_CLIENT)
                 )
         );
+    }
+    private String getFirstProfile(Person person){
+        StringBuilder builder = new StringBuilder();
+        builder.append("Вам назначен chatId: ").append(person.getId()).append("\n")
+                .append("Токен: ").append(person.getToken());
+        return builder.toString();
     }
 
     @Override
@@ -69,35 +78,21 @@ public class AuthManager extends AbstractManager {
         Long chatId = callbackQuery.getMessage().getChatId();
         Integer messageId = callbackQuery.getMessage().getMessageId();
         var person = personRepository.findById(chatId).orElseThrow();
-        if (AUTH_ADMIN.equals(callbackQuery.getData())) {
-            person.setRole(Role.ADMIN);
-            Map<String, String> map = commands.adminCommands();
-            try {
-                //bot.execute(methodFactory.getDeleteMyCommands(chatId));
-                bot.execute(methodFactory.getBotCommandScopeChat(
-                        chatId,
-                        map)
-                );
-            } catch (TelegramApiException e) {
-                log.error(e.getMessage());
-            }
-        } else {
-            person.setRole(Role.CLIENT);
-            Map<String, String> map = commands.builtFirstCommand();
-            try {
-                bot.execute(methodFactory.getBotCommandScopeChat(
-                        chatId,
-                        map)
-                );
-            } catch (TelegramApiException e) {
-                log.error(e.getMessage());
-            }
+        person.setRole(Role.CLIENT);
+        Map<String, String> map = commands.builtFirstCommand();
+        try {
+            bot.execute(methodFactory.getBotCommandScopeChat(
+                    chatId,
+                    map)
+            );
+        } catch (TelegramApiException e) {
+            log.error(e.getMessage());
         }
         person.setAction(Action.FREE);
         personRepository.save(person);
         try {
             bot.execute(methodFactory.getAnswerCallbackQuery(callbackQuery.getId(),
-                    "Авторизация прошла успешно"));
+                    "Команды добавлены, можете ознакомиться"));
         } catch (TelegramApiException e) {
             log.error(e.getMessage());
         }

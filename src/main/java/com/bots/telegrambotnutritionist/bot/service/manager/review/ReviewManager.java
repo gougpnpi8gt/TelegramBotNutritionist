@@ -17,6 +17,8 @@ import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.Message;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
+import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import java.util.List;
 
@@ -26,6 +28,7 @@ import static com.bots.telegrambotnutritionist.bot.service.data.CallBackData.*;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Slf4j
 public class ReviewManager extends AbstractManager {
+    static int count = 0;
     final AnswerMethodFactory methodFactory;
     final KeyboardFactory keyboardFactory;
     final ReviewRepository reviewRepository;
@@ -54,14 +57,25 @@ public class ReviewManager extends AbstractManager {
         if (!message.hasText()) {
             return methodFactory.getSendMessage(
                     message.getChatId(),
-                    """
-                            Сообщение должно содержать текст, повторите попытку
-                         """,
-                   null
+                    "Сообщение должно содержать текст, повторите попытку",
+                    null
             );
         }
         Reviews review = new Reviews(person, message.getText());
-        reviewRepository.save(review);
+        if (person.getReviews().size() < 3) {
+            person.addReviews(review);
+            reviewRepository.save(review);
+        } else {
+            try {
+                bot.execute(methodFactory.getSendMessage(
+                        chatId,
+                        "У вас уже больше 3 оставленных отзывов",
+                        null)
+                );
+            } catch (TelegramApiException e) {
+                log.error(e.getMessage());
+            }
+        }
         person.setAction(Action.FREE);
         personRepository.save(person);
         return mainMenu(message);
@@ -72,10 +86,10 @@ public class ReviewManager extends AbstractManager {
         String callbackData = callbackQuery.getData();
         switch (callbackData) {
             case REVIEWS_PREV -> {
-                return null;
+                return prevReview(callbackQuery);
             }
             case REVIEWS_NEXT -> {
-                return null;
+                return nextReview(callbackQuery);
             }
             case REVIEWS_ADD -> {
                 return addReviews(callbackQuery);
@@ -102,88 +116,86 @@ public class ReviewManager extends AbstractManager {
         );
     }
 
-    private BotApiMethod<?> mainMenu(Message message){
-        List<Reviews> list = reviewRepository.findAll();
+    private BotApiMethod<?> mainMenu(Message message) {
+        List<Reviews> reviews = reviewRepository.findAll();
         Long chatId = message.getChatId();
-        if (list.isEmpty()){
+        if (reviews.isEmpty()) {
             return methodFactory.getSendMessage(
                     chatId,
                     "Отзывов пока нет",
-                    keyboardFactory.getInlineKeyboard(
-                            List.of("Оставить отзыв", "Вернитесь в меню"),
-                            List.of(1, 1),
-                            List.of(REVIEWS_ADD, MENU)
-                    )
+                    getEmptyKeyboard()
             );
         }
         return methodFactory.getSendMessage(
                 chatId,
-                "Всего отзывов: " + list.size() + "\n" +
-                       list.get(0).getDescription(),
-                keyboardFactory.getInlineKeyboard(
-                        List.of("◀\\uFE0F", "▶\\uFE0F", "Оставить отзыв", "Вернитесь в меню"),
-                        List.of(2, 1, 1),
-                        List.of(REVIEWS_PREV, REVIEWS_NEXT, REVIEWS_ADD, MENU)
-                )
+                getDescriptionReview(reviews, REVIEWS_MENU),
+                getStandardKeyboard()
         );
     }
 
-    private BotApiMethod<?> mainMenu(CallbackQuery callbackQuery){
-        List<Reviews> list = reviewRepository.findAll();
-        if (list.isEmpty()){
+    private BotApiMethod<?> mainMenu(CallbackQuery callbackQuery) {
+        var person = personRepository.findPersonById(callbackQuery.getMessage().getChatId());
+        if (person.getAction() == Action.SENDING_REVIEW) {
+            person.setAction(Action.FREE);
+            personRepository.save(person);
+        }
+        List<Reviews> reviews = reviewRepository.findAll();
+        if (reviews.isEmpty()) {
             return methodFactory.getEditMessageText(
                     callbackQuery,
                     "Отзывов пока нет",
-                    keyboardFactory.getInlineKeyboard(
-                            List.of("Оставить отзыв", "Вернитесь в меню"),
-                            List.of(1, 1),
-                            List.of(REVIEWS_ADD, MENU)
-                    )
+                    getEmptyKeyboard()
             );
         }
         return methodFactory.getEditMessageText(
                 callbackQuery,
-                "Всего отзывов: " + list.size() + "\n" +
-                        list.get(0).getDescription(),
-                keyboardFactory.getInlineKeyboard(
-                        List.of("◀\\uFE0F", "▶\\uFE0F", "Оставить отзыв", "Вернитесь в меню"),
-                        List.of(2, 1, 1),
-                        List.of(REVIEWS_PREV, REVIEWS_NEXT, REVIEWS_ADD, MENU)
-                )
+                getDescriptionReview(reviews, callbackQuery.getData()),
+                getStandardKeyboard()
         );
     }
 
-//    private BotApiMethod<?> prevReview(CallbackQuery callbackQuery, Bot bot, List<Reviews> reviews) {
-//        try {
-//            bot.execute(methodFactory.getEditMessagePhoto(
-//                    callbackQuery,
-//                    iterator(reviews),
-//                    keyboardFactory.getInlineKeyboard(
-//                            List.of("◀\uFE0F", "▶\uFE0F", "В меню"),
-//                            List.of(2, 1),
-//                            List.of(REVIEWS_PREV, REVIEWS_NEXT, MENU)
-//                    )
-//            ));
-//        } catch (TelegramApiException e) {
-//            log.error(e.getMessage());
-//        }
-//        return null;
-//    }
+    private BotApiMethod<?> prevReview(CallbackQuery callbackQuery) {
+        List<Reviews> reviews = reviewRepository.findAll();
+        return methodFactory.getEditMessageText(
+                callbackQuery,
+                getDescriptionReview(reviews, callbackQuery.getData()),
+                getStandardKeyboard()
+        );
+    }
 
-//    private BotApiMethod<?> nextReview(CallbackQuery callbackQuery, Bot bot, List<Reviews> reviews) {
-//        try {
-//            bot.execute(methodFactory.getEditMessagePhoto(
-//                    callbackQuery,
-//                    iterator(reviews),
-//                    keyboardFactory.getInlineKeyboard(
-//                            List.of("◀\uFE0F", "▶\uFE0F", "В меню"),
-//                            List.of(2, 1),
-//                            List.of(REVIEWS_PREV, REVIEWS_NEXT, MENU)
-//                    )
-//            ));
-//        } catch (TelegramApiException e) {
-//            log.error(e.getMessage());
-//        }
-//        return null;
-//    }
+    private BotApiMethod<?> nextReview(CallbackQuery callbackQuery) {
+        List<Reviews> reviews = reviewRepository.findAll();
+        return methodFactory.getEditMessageText(
+                callbackQuery,
+                getDescriptionReview(reviews, callbackQuery.getData()),
+                getStandardKeyboard()
+        );
+    }
+
+    private InlineKeyboardMarkup getEmptyKeyboard() {
+        return keyboardFactory.getInlineKeyboard(
+                List.of("Оставить отзыв", "Вернитесь в меню"),
+                List.of(1, 1),
+                List.of(REVIEWS_ADD, MENU)
+        );
+    }
+
+    private InlineKeyboardMarkup getStandardKeyboard() {
+        return keyboardFactory.getInlineKeyboard(
+                List.of("◀", "▶", "Оставить отзыв", "Вернитесь в меню"),
+                List.of(2, 1, 1),
+                List.of(REVIEWS_PREV, REVIEWS_NEXT, REVIEWS_ADD, MENU)
+        );
+    }
+
+    private String getDescriptionReview(List<Reviews> reviews, String data) {
+        int size = reviews.size();
+        count = (data.equals(REVIEWS_PREV)) ? ((count == 0) ? (size - 1) : count - 1)
+                : (data.equals(REVIEWS_NEXT)) ? ((count == (size - 1)) ? 0 : count + 1)
+                : 0;
+        StringBuilder builder = new StringBuilder();
+        builder.append("Всего отзывов: ").append(size).append("\n")
+                .append(reviews.get(count).getDescription());
+        return builder.toString();
+    }
 }

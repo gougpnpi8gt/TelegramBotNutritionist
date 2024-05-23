@@ -13,7 +13,7 @@ public class TextMenu {
 
     @Id
     @Column(name = "id")
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.AUTO)
     int id;
 
     @Column(name = "key")
@@ -26,7 +26,8 @@ public class TextMenu {
         this.keyInfo = keyInfo;
         this.textInfo = textInfo;
     }
-    public TextMenu(){
+
+    public TextMenu() {
 
     }
 

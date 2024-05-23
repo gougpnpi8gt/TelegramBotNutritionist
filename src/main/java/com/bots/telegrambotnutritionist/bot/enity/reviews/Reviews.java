@@ -19,7 +19,7 @@ public class Reviews {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Integer id;
 
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "person_id",
                 referencedColumnName = "id")
     Person person;

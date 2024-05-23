@@ -13,6 +13,7 @@ import java.util.Map;
 @Component
 public class DescriptionCommands {
     private final TextInformation textInformation;
+    private static int contactingTheAdmin = 0;
 
     @Autowired
     public DescriptionCommands(TextInformation textInformation) {
@@ -55,16 +56,28 @@ public class DescriptionCommands {
     public void delete(String keyInfo) {
         textInformation.deleteByKeyInfo(keyInfo);
     }
+    public List<TextMenu> adminList(){
+        List<TextMenu> list = textInformation.findAll();
+        if (contactingTheAdmin == 0){
+//            TextMenu textMenu1 = new TextMenu("ListPersons", "выводит список пользователей");
+//            textInformation.save(textMenu1);
+//            list.add(textMenu1);
+            list.add(new TextMenu("ListPersons", "выводит список пользователей"));
+            list.add(new TextMenu("ListSupports", "выводит список заявок на сопровождение"));
+            list.add(new TextMenu("ListWebinars", "выводит список вебинаров"));
+            list.add(new TextMenu("ListPricesWebinars", "выводит список цен вебинаров"));
+            list.add(new TextMenu("Sales", "график продаж"));
+            textInformation.deleteAll();
+            textInformation.saveAll(list);
+            contactingTheAdmin++;
+            return list;
+        } else {
+            return list;
+        }
+    }
 
     public Map<String, String> adminCommands() {
-        List<TextMenu> list = getMenuList();;
-        textInformation.deleteAll();
-        list.add(new TextMenu("ListPersons", "выводит список пользователей"));
-        list.add(new TextMenu("ListSupports", "выводит список заявок на сопровождение"));
-        list.add(new TextMenu("ListWebinars", "выводит список вебинаров"));
-        list.add(new TextMenu("ListPricesWebinars", "выводит список цен вебинаров"));
-        list.add(new TextMenu("Sales", "график продаж"));
-        textInformation.saveAll(list);
+        List<TextMenu> list = adminList();
         Map<String, String> commands = new HashMap<>();
         for (TextMenu textMenu : list) {
             commands.put(textMenu.getKeyInfo(), textMenu.getTextInfo());

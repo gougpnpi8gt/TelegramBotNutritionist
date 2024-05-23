@@ -1,6 +1,7 @@
 package com.bots.telegrambotnutritionist.bot.service.handler;
 
 import com.bots.telegrambotnutritionist.bot.repository.PersonRepository;
+import com.bots.telegrambotnutritionist.bot.service.manager.auth.AuthManager;
 import com.bots.telegrambotnutritionist.bot.service.manager.editor.EditorManager;
 import com.bots.telegrambotnutritionist.bot.service.manager.review.ReviewManager;
 import com.bots.telegrambotnutritionist.bot.service.manager.submit.SubmitManager;
@@ -19,22 +20,28 @@ public class MessageHandler {
     final SubmitManager submitManager;
     final ReviewManager reviewManager;
     final EditorManager editorManager;
+    final AuthManager authManager;
 
     @Autowired
     public MessageHandler(PersonRepository personRepository,
                           SubmitManager submitManager,
                           ReviewManager reviewManager,
-                          EditorManager editorManager
+                          EditorManager editorManager,
+                          AuthManager authManager
     ) {
         this.personRepository = personRepository;
         this.submitManager = submitManager;
         this.reviewManager = reviewManager;
         this.editorManager = editorManager;
+        this.authManager = authManager;
     }
 
     public BotApiMethod<?> answer(Message message, Bot bot) {
         var person = personRepository.findById(message.getChatId()).orElseThrow();
         switch (person.getAction()) {
+            case AUTH -> {
+                return authManager.answerMessage(message, bot);
+            }
             case SENDING_DATA -> {
                 return submitManager.answerMessage(message, bot);
             }
