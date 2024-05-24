@@ -14,7 +14,7 @@ import java.util.UUID;
 @Entity
 public class Webinar {
     @Id
-    @Column(name = "Webinar_ID")
+    @Column(name = "webinar_id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Integer id;
 

@@ -37,4 +37,5 @@ public class Bot extends TelegramWebhookBot {
     public String getBotUsername() {
         return telegramProperties.getUsername();
     }
+
 }

@@ -2,6 +2,7 @@ package com.bots.telegrambotnutritionist.bot.service.handler;
 
 import com.bots.telegrambotnutritionist.bot.service.manager.aboutMe.AboutMeManager;
 import com.bots.telegrambotnutritionist.bot.service.manager.admin.AdminManager;
+import com.bots.telegrambotnutritionist.bot.service.manager.answer.AnswerManager;
 import com.bots.telegrambotnutritionist.bot.service.manager.editor.EditorManager;
 import com.bots.telegrambotnutritionist.bot.service.manager.menu.MenuManager;
 import com.bots.telegrambotnutritionist.bot.service.manager.review.ReviewManager;
@@ -12,6 +13,7 @@ import com.bots.telegrambotnutritionist.bot.telegram.Bot;
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -22,6 +24,9 @@ import static com.bots.telegrambotnutritionist.bot.service.data.Command.*;
 @Service
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class CommandHandler {
+
+    @Value("${unique.chat}")
+    String chat;
     final SupportManager supportManager;
     final ReviewManager reviewManager;
     final WebinarManager webinarManager;
@@ -30,6 +35,7 @@ public class CommandHandler {
     final AdminManager adminManager;
     final SubmitManager submitManager;
     final EditorManager editorManager;
+    final AnswerManager answerManager;
     @Autowired
     public CommandHandler(SupportManager supportManager,
                           ReviewManager reviewManager,
@@ -38,7 +44,8 @@ public class CommandHandler {
                           MenuManager menuManager,
                           AdminManager adminManager,
                           SubmitManager submitManager,
-                          EditorManager editorManager
+                          EditorManager editorManager,
+                          AnswerManager answerManager
     ) {
         this.reviewManager = reviewManager;
         this.webinarManager = webinarManager;
@@ -48,6 +55,7 @@ public class CommandHandler {
         this.adminManager = adminManager;
         this.submitManager = submitManager;
         this.editorManager = editorManager;
+        this.answerManager = answerManager;
     }
 
     public BotApiMethod<?> answer(Message message, Bot bot) {
@@ -66,7 +74,11 @@ public class CommandHandler {
                 return aboutMeManager.answerCommand(message, bot);
             }
             case ADMIN -> {
-                return adminManager.answerCommand(message, bot);
+                if (isAuthorizedUser(message.getChatId())){
+                    return adminManager.answerCommand(message, bot);
+                } else {
+                    return errorAdmin(message);
+                }
             }
             case WEBINARS -> {
                 return webinarManager.answerCommand(message, bot);
@@ -77,15 +89,29 @@ public class CommandHandler {
             case EDITOR -> {
                 return editorManager.answerCommand(message, bot);
             }
+            case ANSWER -> {
+                return answerManager.answerCommand(message, bot);
+            }
             default -> {
                 return defaultAnswer(message);
             }
         }
     }
+    private boolean isAuthorizedUser(Long chatId) {
+        return (chatId.toString().equals(chat));
+    }
 
     private BotApiMethod<?> defaultAnswer(Message message) {
         return SendMessage.builder().text("""
                         Неподдерживаемая команда
+                        """)
+                .chatId(message.getChatId())
+                .build();
+    }
+
+    private BotApiMethod<?> errorAdmin(Message message){
+        return SendMessage.builder().text("""
+                        Вы не администратор, вернитесь в меню
                         """)
                 .chatId(message.getChatId())
                 .build();

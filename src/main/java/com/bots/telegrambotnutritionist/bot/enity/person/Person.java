@@ -28,20 +28,20 @@ public class Person {
             unique = true)
     String token; // уникальный для каждого человека и его может будет поменять
 
-    @Column(name = "Name")
+    @Column(name = "name")
     //@NotEmpty(message = "Имя не должно быть пустым")
     //@Size(min = 2, max = 20, message = "Имя не больше 20 символов")
     String name;
 
-    @Column(name = "SurName")
+    @Column(name = "sur_name")
     //@Size(min = 2, max = 20, message = "Фамилия не больше 20 символов")
     String surName;
 
-    @Column(name = "Patronymic")
+    @Column(name = "patronymic")
     //@Size(min = 2, max = 20, message = "Отчество не больше 20 символов")
     String patronymic;
 
-    @Column(name = "Age")
+    @Column(name = "age")
     //@NotNull
     //@Min(value = 0, message = "Возраст начинается от 0")
    // @Max(value = 100, message = "Возраст не может быть больше 100 лет")
@@ -50,22 +50,22 @@ public class Person {
     @Enumerated(EnumType.STRING)
     Gender gender;
 
-    @Column(name = "Weight")
+    @Column(name = "weight")
     //@Min(value = 0, message = "Вес начинается от 0")
     //@Max(value = 300, message = "Для ограничения ввода случайно большого числа.\\n " +
    //         "Вес не может быть больше 300 кг")
     int weight;
 
-    @Column(name = "Birthday")
+    @Column(name = "birthday")
     //@Temporal(TemporalType.TIMESTAMP)
     LocalDateTime birthday;
 
-    @Column(name = "Country")
+    @Column(name = "country")
    // @Size(min = 2, max = 20, message = "Не больше 20 символов")
    // @NotEmpty(message = "Поле не должно быть пустым")
     String country;
 
-    @Column(name = "Characteristic")
+    @Column(name = "characteristic")
    // @Size(min = 2, max = 1000, message = "Описание не больше 1000 символов")
     String characteristicsOfAPerson;
 

@@ -44,24 +44,25 @@ public class AdminManager extends AbstractManager {
     @Override
     public BotApiMethod<?> answerCommand(Message message, Bot bot) {
         Long chatId = message.getChatId();
-        var person = personRepository.findById(chatId).orElseThrow();
-        if (person.getRole().equals(Role.CLIENT)){
+        var person = personRepository.findPersonById(chatId);
+        List<TextMenu> textMenus;
+        if (person.getRole().equals(Role.CLIENT) && countTheAdmin == 0){
             person.setRole(Role.ADMIN);
             personRepository.save(person);
-        }
-        List<TextMenu> textMenus = textInformation.findAll();
-        if (countTheAdmin == 0){
-//            Map<String, String> map = commands.adminCommands();
-//            try {
-//                bot.execute(methodFactory.getDeleteMyCommands(chatId));
-//                bot.execute(methodFactory.getBotCommandScopeChat(
-//                        chatId,
-//                        map)
-//                );
-//            } catch (TelegramApiException e) {
-//                log.error(e.getMessage());
-//            }
+            textMenus = commands.adminList();
+            Map<String, String> map = commands.adminCommands();
+            try {
+                bot.execute(methodFactory.getDeleteMyCommands(chatId));
+                bot.execute(methodFactory.getBotCommandScopeChat(
+                        chatId,
+                        map)
+                );
+            } catch (TelegramApiException e) {
+                log.error(e.getMessage());
+            }
             countTheAdmin++;
+        } else {
+            textMenus = textInformation.findAll();
         }
         StringBuilder builder = new StringBuilder();
         textMenus
@@ -92,7 +93,7 @@ public class AdminManager extends AbstractManager {
                 .forEach(string -> builder.append(string).append("\n"));
         return methodFactory.getEditMessageText(
                 callbackQuery,
-                STR."Привет! Чем могу служить?\n Список доступных команд: \n \{builder}",//?
+                STR."Привет! Чем могу служить?\n Список доступных команд: \n \{builder}",
                 null
         );
     }

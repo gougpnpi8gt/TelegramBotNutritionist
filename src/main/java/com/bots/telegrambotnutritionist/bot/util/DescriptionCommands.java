@@ -59,17 +59,16 @@ public class DescriptionCommands {
     public List<TextMenu> adminList(){
         List<TextMenu> list = textInformation.findAll();
         if (contactingTheAdmin == 0){
-//            TextMenu textMenu1 = new TextMenu("ListPersons", "выводит список пользователей");
-//            textInformation.save(textMenu1);
-//            list.add(textMenu1);
-            list.add(new TextMenu("ListPersons", "выводит список пользователей"));
-            list.add(new TextMenu("ListSupports", "выводит список заявок на сопровождение"));
-            list.add(new TextMenu("ListWebinars", "выводит список вебинаров"));
-            list.add(new TextMenu("ListPricesWebinars", "выводит список цен вебинаров"));
-            list.add(new TextMenu("Sales", "график продаж"));
-            textInformation.deleteAll();
-            textInformation.saveAll(list);
+            List<TextMenu> dopList = new ArrayList<>();
+            dopList.add(new TextMenu("list_persons", "выводит список пользователей"));
+            dopList.add(new TextMenu("list_supports", "выводит список заявок на сопровождение"));
+            dopList.add(new TextMenu("list_webinars", "выводит список вебинаров"));
+            dopList.add(new TextMenu("list_price_webinars", "выводит список цен вебинаров"));
+            dopList.add(new TextMenu("sales", "график продаж"));
+            dopList.add(new TextMenu("editor", "меню редактирования команд"));
+            textInformation.saveAll(dopList);
             contactingTheAdmin++;
+            list.addAll(dopList);
             return list;
         } else {
             return list;

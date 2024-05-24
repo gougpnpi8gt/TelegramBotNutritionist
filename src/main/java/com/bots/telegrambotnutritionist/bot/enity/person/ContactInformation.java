@@ -17,10 +17,10 @@ public class ContactInformation {
 
     @Email
    // @NotEmpty(message = "Поле не должно быть пустым")
-    @Column(name = "Email")
+    @Column(name = "email")
     String email;
 
-    @Column(name = "Phone_number")
+    @Column(name = "phone_number")
     //@Pattern(regexp = "\\d{3}-\\d{3}-\\d{2}-\\d{2}")
     String phone;
 
@@ -29,7 +29,7 @@ public class ContactInformation {
     Integer id;
 
     @OneToOne
-    @JoinColumn(name = "Person_ID",
+    @JoinColumn(name = "person_id",
             referencedColumnName = "id")
     Person PersonID;
 }

@@ -1,6 +1,7 @@
 package com.bots.telegrambotnutritionist.bot.service.handler;
 
 import com.bots.telegrambotnutritionist.bot.service.manager.aboutMe.AboutMeManager;
+import com.bots.telegrambotnutritionist.bot.service.manager.answer.AnswerManager;
 import com.bots.telegrambotnutritionist.bot.service.manager.auth.AuthManager;
 import com.bots.telegrambotnutritionist.bot.service.manager.editor.EditorManager;
 import com.bots.telegrambotnutritionist.bot.service.manager.menu.MenuManager;
@@ -30,6 +31,7 @@ public class CallBackQueryHandler {
     final MenuManager menuManager;
     final SubmitManager submitManager;
     final EditorManager editorManager;
+    final AnswerManager answerManager;
     @Autowired
     public CallBackQueryHandler(AuthManager authManager,
                                 SupportManager supportManager,
@@ -38,7 +40,8 @@ public class CallBackQueryHandler {
                                 ReviewManager reviewManager,
                                 MenuManager menuManager,
                                 SubmitManager submitManager,
-                                EditorManager editorManager
+                                EditorManager editorManager,
+                                AnswerManager answerManager
     ) {
         this.authManager = authManager;
         this.supportManager = supportManager;
@@ -48,6 +51,7 @@ public class CallBackQueryHandler {
         this.menuManager = menuManager;
         this.submitManager = submitManager;
         this.editorManager = editorManager;
+        this.answerManager = answerManager;
     }
 
     public BotApiMethod<?> answer(CallbackQuery callBackQuery, Bot bot) {
@@ -62,6 +66,9 @@ public class CallBackQueryHandler {
             }
             case COMMAND -> {
                 return editorManager.answerCallbackQuery(callBackQuery, bot);
+            }
+            case QUESTION -> {
+                return answerManager.answerCallbackQuery(callBackQuery, bot);
             }
         }
         switch (callbackData) {
@@ -85,6 +92,9 @@ public class CallBackQueryHandler {
             }
             case EDITOR -> {
                 return editorManager.answerCallbackQuery(callBackQuery, bot);
+            }
+            case ANSWER -> {
+                return answerManager.answerCallbackQuery(callBackQuery, bot);
             }
         }
         return null;

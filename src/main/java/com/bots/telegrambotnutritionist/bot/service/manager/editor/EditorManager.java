@@ -124,29 +124,45 @@ public class EditorManager extends AbstractManager {
     private BotApiMethod<?> mainMenu(Message message) {
         return methodFactory.getSendMessage(
                 message.getChatId(),
-                """
-                        Меню редактирования команд
-                        """,
+                "Меню редактирования сообщений",
                 getKeyboardMainMenu()
         );
+//        return methodFactory.getSendMessage(
+//                message.getChatId(),
+//                """
+//                        Меню редактирования команд
+//                        """,
+//                getKeyboardMainMenu()
+//        );
     }
 
     private BotApiMethod<?> mainMenu(CallbackQuery callbackQuery) {
         return methodFactory.getEditMessageText(
                 callbackQuery,
-                """
-                        Меню редактирования команд
-                        """,
+                "Меню редактирования сообщений",
                 getKeyboardMainMenu()
         );
+//        return methodFactory.getEditMessageText(
+//                callbackQuery,
+//                """
+//                        Меню редактирования команд
+//                        """,
+//                getKeyboardMainMenu()
+//        );
     }
     private InlineKeyboardMarkup getKeyboardMainMenu(){
         return keyboardFactory.getInlineKeyboard(
                 List.of("Добавить команду", "Удалить команду",
-                        "Обновить описание команды", "Вернуться обратно в меню"),
-                List.of(2, 1, 1),
-                List.of(COMMAND_ADD, COMMAND_DELETE, COMMAND_UPDATE, MENU)
+                        "Обновить описание команды", "Вернуться обратно в меню администратора"),
+                List.of(2, 1),
+                List.of(COMMAND_ADD, COMMAND_UPDATE, ADMIN)
         );
+//        return keyboardFactory.getInlineKeyboard(
+//                List.of("Добавить команду", "Удалить команду",
+//                        "Обновить описание команды", "Вернуться обратно в меню"),
+//                List.of(2, 1, 1),
+//                List.of(COMMAND_ADD, COMMAND_DELETE, COMMAND_UPDATE, MENU)
+//        );
     }
 
     private BotApiMethod<?> getNoRights(CallbackQuery callbackQuery) {
