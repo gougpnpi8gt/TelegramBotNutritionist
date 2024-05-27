@@ -70,6 +70,9 @@ public class CallBackQueryHandler {
             case QUESTION -> {
                 return answerManager.answerCallbackQuery(callBackQuery, bot);
             }
+            case SUBMIT -> {
+                return submitManager.answerCallbackQuery(callBackQuery, bot);
+            }
         }
         switch (callbackData) {
             case MENU, START -> {

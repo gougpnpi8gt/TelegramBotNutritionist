@@ -1,5 +1,6 @@
 package com.bots.telegrambotnutritionist.bot.service.handler;
 
+import com.bots.telegrambotnutritionist.bot.enity.person.Action;
 import com.bots.telegrambotnutritionist.bot.repository.PersonRepository;
 import com.bots.telegrambotnutritionist.bot.service.manager.answer.AnswerManager;
 import com.bots.telegrambotnutritionist.bot.service.manager.auth.AuthManager;
@@ -42,12 +43,14 @@ public class MessageHandler {
 
     public BotApiMethod<?> answer(Message message, Bot bot) {
         var person = personRepository.findById(message.getChatId()).orElseThrow();
-        switch (person.getAction()) {
+        Action action = person.getAction();
+        String[] data = action.toString().split("_");
+        if (data.length > 1){
+            return submitManager.answerMessage(message, bot);
+        }
+        switch (action) {
             case AUTH -> {
                 return authManager.answerMessage(message, bot);
-            }
-            case SENDING_DATA -> {
-                return submitManager.answerMessage(message, bot);
             }
             case SENDING_REVIEW -> {
                 return reviewManager.answerMessage(message, bot);
@@ -55,7 +58,7 @@ public class MessageHandler {
             case ADD_COMMAND, DELETE_COMMAND, UPDATE_COMMAND -> {
                 return editorManager.answerMessage(message, bot);
             }
-            case SENDING_ANSWER -> {
+            case SENDING_QUESTION, SENDING_ADMIN -> {
                 return answerManager.answerMessage(message, bot);
             }
         }

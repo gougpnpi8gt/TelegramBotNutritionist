@@ -50,6 +50,8 @@ public class CallBackData {
     public static final String SUBMIT_CANCEL = "submit_cancel";
     public static final String SUBMIT_YES = "submit_yes";
     public static final String SUBMIT_NO = "submit_no";
+    public static final String SUBMIT_SEND = "submit_send";
+
 
     /*
     Ответы на вопросы
@@ -59,6 +61,8 @@ public class CallBackData {
     public static final String QUESTION_PREV = "question_prev";
     public static final String QUESTION_NEXT = "question_next";
     public static final String QUESTION_CANCEL = "question_cancel";
+    public static final String QUESTION_ADMIN = "question_admin";
+    public static final String QUESTION_UPDATE = "question_update";
     /*
 
      */

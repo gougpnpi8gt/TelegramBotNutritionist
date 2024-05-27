@@ -25,9 +25,6 @@ public class Question {
             referencedColumnName = "id")
     Person person;
 
-//    @Column(name = "chat_id_client")
-//    Long chatId;
-
     @Column(name = "answer_admin")
     String answerAdmin;
 

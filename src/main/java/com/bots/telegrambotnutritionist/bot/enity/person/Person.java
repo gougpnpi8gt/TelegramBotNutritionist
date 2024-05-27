@@ -5,7 +5,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -58,7 +58,7 @@ public class Person {
 
     @Column(name = "birthday")
     //@Temporal(TemporalType.TIMESTAMP)
-    LocalDateTime birthday;
+    LocalDate birthday;
 
     @Column(name = "country")
    // @Size(min = 2, max = 20, message = "Не больше 20 символов")

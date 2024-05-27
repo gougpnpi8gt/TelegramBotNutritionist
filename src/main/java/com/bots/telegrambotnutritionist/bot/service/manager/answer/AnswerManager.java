@@ -2,6 +2,7 @@ package com.bots.telegrambotnutritionist.bot.service.manager.answer;
 
 import com.bots.telegrambotnutritionist.bot.enity.person.Action;
 import com.bots.telegrambotnutritionist.bot.enity.person.Person;
+import com.bots.telegrambotnutritionist.bot.enity.person.Role;
 import com.bots.telegrambotnutritionist.bot.enity.question.Question;
 import com.bots.telegrambotnutritionist.bot.repository.PersonRepository;
 import com.bots.telegrambotnutritionist.bot.repository.QuestionsRepository;
@@ -60,10 +61,11 @@ public class AnswerManager extends AbstractManager {
                     getEmptyKeyboard()
             );
         }
+        Role role = findPerson(chatId).getRole();
         return methodFactory.getSendMessage(
                 chatId,
                 getDescriptionQuestion(questions, ANSWER),
-                getStandardKeyboard()
+                getStandardKeyboard(role)
         );
     }
 
@@ -82,38 +84,65 @@ public class AnswerManager extends AbstractManager {
                 : 0;
         StringBuilder builder = new StringBuilder();
         Question question = questions.get(count);
-        if (question.getAnswerAdmin() != null ){
-            builder.append("Всего заданных вопросов: ").append(size).append("\n")
+        if (question.getAnswerAdmin() != null) {
+            builder
+                    .append("\uD83D\uDCD6").append(" Всего заданных вопросов: ").append(size).append("\n")
+                    .append("\uD83D\uDCCC").append(" Описание вопроса: ").append("\n")
                     .append(question.getDescription()).append("\n")
-                    .append("Ответ администратора: ").append("\n")
+                    .append("✅").append(" Ответ администратора: ").append("\n")
                     .append(question.getAnswerAdmin());
         } else {
             builder.append("Всего заданных вопросов: ").append(size).append("\n")
-                    .append("Администратор еще не ответил на вопрос");
+                    .append("\uD83D\uDCCC").append(" Описание вопроса: ").append("\n")
+                    .append(question.getDescription()).append("\n")
+                    .append("\uD83C\uDD70\uFE0F").append(" Администратор еще не ответил на вопрос:").append("\n");
         }
         return builder.toString();
     }
 
-    private InlineKeyboardMarkup getStandardKeyboard() {
-        return keyboardFactory.getInlineKeyboard(
-                List.of("◀", "▶", "Написать вопрос", "Посмотреть отзывы", "Вернуться в меню сопровождения"),
-                List.of(2, 2, 1),
-                List.of(QUESTION_PREV, QUESTION_NEXT, QUESTION_ADD, REVIEWS, SUPPORT)
-        );
+    private InlineKeyboardMarkup getStandardKeyboard(Role role) {
+        if (role.equals(Role.ADMIN)) {
+            return keyboardFactory.getInlineKeyboard(
+                    List.of("◀", "▶",
+                            "Ответить на вопрос клиента", "Обновить свой ответ на вопрос",
+                            "Написать вопрос", "Посмотреть отзывы",
+                            "Вернуться в меню сопровождения"),
+                    List.of(2, 2, 2),
+                    List.of(QUESTION_PREV, QUESTION_NEXT,
+                            QUESTION_ADMIN, QUESTION_UPDATE,
+                            QUESTION_ADD, REVIEWS,
+                            SUPPORT)
+            );
+        } else {
+            return keyboardFactory.getInlineKeyboard(
+                    List.of("◀", "▶", "Написать вопрос", "Посмотреть отзывы", "Вернуться в меню сопровождения"),
+                    List.of(2, 2, 1),
+                    List.of(QUESTION_PREV, QUESTION_NEXT,
+                            QUESTION_ADD, REVIEWS,
+                            SUPPORT)
+            );
+        }
     }
 
     @Override
     public BotApiMethod<?> answerMessage(Message message, Bot bot) {
         Long chatId = message.getChatId();
-        Person person = personRepository.findPersonById(chatId);
         if (!message.hasText()) {
             return methodFactory.getSendMessage(
-                    message.getChatId(),
+                    chatId,
                     "Сообщение должно содержать текст, повторите попытку",
                     null
             );
         }
-        Question question = new Question(message.getText(), person);
+        Person person = findPerson(chatId);
+        String text = message.getText();
+        Question question;
+        if (person.getAction().equals(Action.SENDING_QUESTION)) {
+            question = new Question(text, person);
+        } else {
+            question = questionsRepository.findAll().get(count);
+            question.setAnswerAdmin(text);
+        }
         questionsRepository.save(question);
         person.setAction(Action.FREE);
         personRepository.save(person);
@@ -136,18 +165,57 @@ public class AnswerManager extends AbstractManager {
             case QUESTION_CANCEL -> {
                 return cancel(callbackQuery, bot);
             }
+            case QUESTION_ADMIN -> {
+                return adminAnswer(callbackQuery);
+            }
+            case QUESTION_UPDATE -> {
+                return updateAnswer(callbackQuery);
+            }
             default -> {
                 return mainMenu(callbackQuery);
             }
         }
     }
 
+    private BotApiMethod<?> updateAnswer(CallbackQuery callbackQuery) {
+        Person person = findPerson(callbackQuery.getMessage().getChatId());
+        person.setAction(Action.SENDING_ADMIN);
+        personRepository.save(person);
+        return methodFactory.getEditMessageText(
+                callbackQuery,
+                "Измените ответ на вопрос клиента",
+                keyboardFactory.getInlineKeyboard(
+                        List.of("Отмена"),
+                        List.of(1),
+                        List.of(QUESTION_CANCEL)
+                )
+        );
+    }
+
+    private BotApiMethod<?> adminAnswer(CallbackQuery callbackQuery) {
+        Person person = findPerson(callbackQuery.getMessage().getChatId());
+        person.setAction(Action.SENDING_ADMIN);
+        personRepository.save(person);
+        return methodFactory.getEditMessageText(
+                callbackQuery,
+                "Напишите ответ на вопрос клиента",
+                keyboardFactory.getInlineKeyboard(
+                        List.of("Отмена"),
+                        List.of(1),
+                        List.of(QUESTION_CANCEL)
+                )
+        );
+    }
+
     private BotApiMethod<?> cancel(CallbackQuery callbackQuery, Bot bot) {
-        var person = personRepository.findPersonById(callbackQuery.getMessage().getChatId());
+        Person person = findPerson(callbackQuery.getMessage().getChatId());
         person.setAction(Action.FREE);
         personRepository.save(person);
         try {
-            bot.execute(methodFactory.getAnswerCallbackQuery(callbackQuery.getId(), "Операция отменена"));
+            bot.execute(methodFactory.getAnswerCallbackQuery(
+                    callbackQuery.getId(),
+                    "Операция отменена")
+            );
         } catch (TelegramApiException e) {
             log.error(e.getMessage());
         }
@@ -156,25 +224,27 @@ public class AnswerManager extends AbstractManager {
 
     private BotApiMethod<?> prevQuestion(CallbackQuery callbackQuery) {
         List<Question> questions = questionsRepository.findAll();
+        Role role = findPerson(callbackQuery.getMessage().getChatId()).getRole();
         return methodFactory.getEditMessageText(
                 callbackQuery,
                 getDescriptionQuestion(questions, callbackQuery.getData()),
-                getStandardKeyboard()
+                getStandardKeyboard(role)
         );
     }
 
     private BotApiMethod<?> nextQuestion(CallbackQuery callbackQuery) {
         List<Question> questions = questionsRepository.findAll();
+        Role role = findPerson(callbackQuery.getMessage().getChatId()).getRole();
         return methodFactory.getEditMessageText(
                 callbackQuery,
                 getDescriptionQuestion(questions, callbackQuery.getData()),
-                getStandardKeyboard()
+                getStandardKeyboard(role)
         );
     }
 
     private BotApiMethod<?> addQuestion(CallbackQuery callbackQuery) {
         Person person = personRepository.findPersonById(callbackQuery.getMessage().getChatId());
-        person.setAction(Action.SENDING_ANSWER);
+        person.setAction(Action.SENDING_QUESTION);
         personRepository.save(person);
         return methodFactory.getEditMessageText(
                 callbackQuery,
@@ -196,10 +266,15 @@ public class AnswerManager extends AbstractManager {
                     getEmptyKeyboard()
             );
         }
+        Role role = findPerson(callbackQuery.getMessage().getChatId()).getRole();
         return methodFactory.getEditMessageText(
                 callbackQuery,
                 getDescriptionQuestion(questions, ANSWER),
-                getStandardKeyboard()
+                getStandardKeyboard(role)
         );
+    }
+
+    private Person findPerson(Long chatId) {
+        return personRepository.findPersonById(chatId);
     }
 }
