@@ -15,21 +15,21 @@ import lombok.experimental.FieldDefaults;
 @Table(name = "Contacts")
 public class ContactInformation {
 
-    @Email
-   // @NotEmpty(message = "Поле не должно быть пустым")
+    @Id
+    @Column(name = "id")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    Integer id;
+
+    @Email(message = "Сообщение должно иметь формат адреса электронной почты")
     @Column(name = "email")
     String email;
 
     @Column(name = "phone_number")
-    //@Pattern(regexp = "\\d{3}-\\d{3}-\\d{2}-\\d{2}")
+    @Pattern(regexp = "^\\+7\\(\\d{3}\\)-\\d{3}-\\d{2}-\\d{2}$", message = "Не верный формат номера телефона")
     String phone;
-
-    @Id
-    @Column(name = "id")
-    Integer id;
 
     @OneToOne
     @JoinColumn(name = "person_id",
             referencedColumnName = "id")
-    Person PersonID;
+    Person person;
 }

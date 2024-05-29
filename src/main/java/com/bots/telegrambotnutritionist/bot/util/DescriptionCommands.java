@@ -60,6 +60,7 @@ public class DescriptionCommands {
         List<TextMenu> list = textInformation.findAll();
         if (contactingTheAdmin == 0){
             List<TextMenu> dopList = new ArrayList<>();
+            dopList.add(new TextMenu("admin", "страничка администратора"));
             dopList.add(new TextMenu("list_persons", "выводит список пользователей"));
             dopList.add(new TextMenu("list_supports", "выводит список заявок на сопровождение"));
             dopList.add(new TextMenu("list_webinars", "выводит список вебинаров"));

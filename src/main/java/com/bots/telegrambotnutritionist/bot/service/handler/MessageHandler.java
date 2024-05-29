@@ -2,6 +2,7 @@ package com.bots.telegrambotnutritionist.bot.service.handler;
 
 import com.bots.telegrambotnutritionist.bot.enity.person.Action;
 import com.bots.telegrambotnutritionist.bot.repository.PersonRepository;
+import com.bots.telegrambotnutritionist.bot.service.manager.admin.AdminManager;
 import com.bots.telegrambotnutritionist.bot.service.manager.answer.AnswerManager;
 import com.bots.telegrambotnutritionist.bot.service.manager.auth.AuthManager;
 import com.bots.telegrambotnutritionist.bot.service.manager.editor.EditorManager;
@@ -15,6 +16,8 @@ import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
 import org.telegram.telegrambots.meta.api.objects.Message;
 
+import static com.bots.telegrambotnutritionist.bot.enity.person.Action.DATE;
+
 @Service
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class MessageHandler {
@@ -24,6 +27,7 @@ public class MessageHandler {
     final EditorManager editorManager;
     final AuthManager authManager;
     final AnswerManager answerManager;
+    final AdminManager adminManager;
 
     @Autowired
     public MessageHandler(PersonRepository personRepository,
@@ -31,7 +35,7 @@ public class MessageHandler {
                           ReviewManager reviewManager,
                           EditorManager editorManager,
                           AuthManager authManager,
-                          AnswerManager answerManager
+                          AnswerManager answerManager, AdminManager adminManager
     ) {
         this.personRepository = personRepository;
         this.submitManager = submitManager;
@@ -39,16 +43,20 @@ public class MessageHandler {
         this.editorManager = editorManager;
         this.authManager = authManager;
         this.answerManager = answerManager;
+        this.adminManager = adminManager;
     }
 
     public BotApiMethod<?> answer(Message message, Bot bot) {
         var person = personRepository.findById(message.getChatId()).orElseThrow();
         Action action = person.getAction();
-        String[] data = action.toString().split("_");
-        if (data.length > 1){
+        String[] date = action.toString().split("_");
+        if (date[0].equals(DATE.toString())){
             return submitManager.answerMessage(message, bot);
         }
         switch (action) {
+            case ADMIN -> {
+                return adminManager.answerMessage(message, bot);
+            }
             case AUTH -> {
                 return authManager.answerMessage(message, bot);
             }
@@ -60,6 +68,9 @@ public class MessageHandler {
             }
             case SENDING_QUESTION, SENDING_ADMIN -> {
                 return answerManager.answerMessage(message, bot);
+            }
+            case SUBMIT_DESCRIPTION -> {
+                return submitManager.answerMessage(message, bot);
             }
         }
         return null;

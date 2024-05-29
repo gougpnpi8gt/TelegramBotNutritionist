@@ -42,6 +42,7 @@ public class CallBackData {
     Меню администратора
      */
     public static final String ADMIN = "admin";
+    public static final String ADMIN_CANCEL = "admin_cancel";
     public static final String EDITOR = "editor";
 
     /*
@@ -51,7 +52,8 @@ public class CallBackData {
     public static final String SUBMIT_YES = "submit_yes";
     public static final String SUBMIT_NO = "submit_no";
     public static final String SUBMIT_SEND = "submit_send";
-
+    public static final String SUBMIT_NEW = "submit_new";
+    public static final String SUBMIT_CHECK = "submit_check";
 
     /*
     Ответы на вопросы

@@ -1,6 +1,7 @@
 package com.bots.telegrambotnutritionist.bot.controller;
 
 import com.bots.telegrambotnutritionist.bot.telegram.Bot;
+import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
 import org.telegram.telegrambots.meta.api.objects.Update;
+
 
 @RestController
 @FieldDefaults(level = AccessLevel.PRIVATE)
@@ -21,7 +23,7 @@ public class MainController {
     }
 
     @PostMapping("/")
-    public BotApiMethod<?> listener(@RequestBody Update update) {
+    public BotApiMethod<?> listener(@RequestBody @Valid Update update) {
         return bot.onWebhookUpdateReceived(update);
     }
 }

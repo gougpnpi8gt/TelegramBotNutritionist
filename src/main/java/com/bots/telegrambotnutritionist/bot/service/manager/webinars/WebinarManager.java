@@ -21,6 +21,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static com.bots.telegrambotnutritionist.bot.service.data.CallBackData.*;
@@ -96,9 +97,9 @@ public class WebinarManager extends AbstractManager {
     private List<Webinar> getFiles(){
         List<Webinar> webinars = webinarRepository.findAll();
         if (webinars.isEmpty()) {
-            File directoryFile = new File("D:\\Projects");
+            File directoryFileWithVideos = new File("D:\\Projects");
             List<File> files = Arrays
-                    .stream(directoryFile.listFiles())
+                    .stream(directoryFileWithVideos.listFiles())
                     .filter(File::isFile)
                     .collect(Collectors.toList());
             if (!files.isEmpty()) {
@@ -118,43 +119,45 @@ public class WebinarManager extends AbstractManager {
 
     @Override
     public BotApiMethod<?> answerCallbackQuery(CallbackQuery callbackQuery, Bot bot) {
-        List<Webinar> list = getFiles();
-        Long chatId = callbackQuery.getMessage().getChatId();
-        if (list.isEmpty()){
-            return methodFactory.getSendMessage(
-                    chatId,
-                    "Вебинаров пока нет",
-                    keyboardFactory.getInlineKeyboard(
-                            List.of("Вернитесь в меню"),
-                            List.of(1),
-                            List.of(MENU)
-                    )
-            );
-        }
-        List<String> text = new ArrayList<>();
-        List<Integer> cfg = new ArrayList<>();
-        List<String> data = new ArrayList<>();
-        int index = 0;
-        for (Webinar video : list) {
-            String nameVideo = video.getName();
-            text.add(nameVideo);
-            data.add(WEBINARS + "_" + nameVideo.split(" ")[1]);
-            if (index == 3) {
-                cfg.add(3);
-                index = 0;
-            } else {
-                index += 1;
+        String date = callbackQuery.getData();
+        String[] callbackData = date.split("_");
+        if (callbackData.length > 1){
+            Webinar webinar = webinarRepository.findWebinarById(Integer.valueOf(callbackData[1]));
+            return showWebinar(callbackQuery, bot, webinar);
+        } else {
+            List<Webinar> list = getFiles();
+            if (list.isEmpty()) {
+                return methodFactory.getEditMessageText(
+                        callbackQuery,
+                        "Вебинаров пока нет",
+                        keyboardFactory.getInlineKeyboard(
+                                List.of("Вернитесь в меню"),
+                                List.of(1),
+                                List.of(MENU)
+                        )
+                );
             }
-        }
-        if (index != 0) {
-            cfg.add(index);
-        }
-        text.add("Меню");
-        cfg.add(1);
-        data.add(MENU);
-        String callBack = callbackQuery.getData();
-        String[] date = callBack.split("_");
-        if (date.length == 1) {
+            List<String> text = new ArrayList<>();
+            List<Integer> cfg = new ArrayList<>();
+            List<String> data = new ArrayList<>();
+            int index = 0;
+            for (Webinar video : list) {
+                String nameVideo = video.getName();
+                text.add(nameVideo);
+                data.add(WEBINARS + "_" + nameVideo.split(" ")[1]);
+                if (index == 3) {
+                    cfg.add(3);
+                    index = 0;
+                } else {
+                    index += 1;
+                }
+            }
+            if (index != 0) {
+                cfg.add(index);
+            }
+            text.add("Меню");
+            cfg.add(1);
+            data.add(MENU);
             return methodFactory.getEditMessageText(
                     callbackQuery,
                     """
@@ -171,23 +174,16 @@ public class WebinarManager extends AbstractManager {
                             data
                     )
             );
-        } else if (date.length >= 2) {
-            Webinar webinar = webinarRepository.findByName(callBack);
-            switch (date[1]){
-                case "1", "2", "3", "4", "5", "6", "7", "8", "9" ->{
-                    return showWebinar(callbackQuery, bot, webinar);
-                }
-            }
         }
-        return null;
     }
 
     private BotApiMethod<?> showWebinar(CallbackQuery callbackQuery, Bot bot, Webinar webinar) {
         if (webinar.isPay()) {
             try {
-                bot.execute(methodFactory.getEditMessageVideo(
-                                callbackQuery,
-                                "D:\\Projects\\" + webinar.getName(),
+                bot.execute(methodFactory.getSendVideo(
+                                callbackQuery.getMessage().getChatId(),
+                                "D:\\Projects\\" + webinar.getName() + ".mp4",
+                                webinar.getName(),
                                 keyboardFactory.getInlineKeyboard(
                                         List.of("Открыть полный список вебинаров"),
                                         List.of(1),

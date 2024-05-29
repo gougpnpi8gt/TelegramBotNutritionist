@@ -23,14 +23,22 @@ public class Support {
     Integer id;
 
     @Column(name = "time_creation")
-    //@Temporal(TemporalType.DATE)
+    @Temporal(TemporalType.DATE)
     LocalDate timeOfCreation;
 
     @Column(name = "text_description")
     String description;
 
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "person_id",
         referencedColumnName = "id")
     Person person;
+
+    @Override
+    public String toString() {
+        return "\uD83E\uDD86 Заявка: " + "\n" +
+                "Номер заявки - " + id + "\n" +
+                "Время создания - " + timeOfCreation + "\n" +
+                "Описание: " + description + "\n";
+    }
 }

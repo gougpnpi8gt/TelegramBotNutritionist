@@ -1,6 +1,7 @@
 package com.bots.telegrambotnutritionist.bot.service.handler;
 
 import com.bots.telegrambotnutritionist.bot.service.manager.aboutMe.AboutMeManager;
+import com.bots.telegrambotnutritionist.bot.service.manager.admin.AdminManager;
 import com.bots.telegrambotnutritionist.bot.service.manager.answer.AnswerManager;
 import com.bots.telegrambotnutritionist.bot.service.manager.auth.AuthManager;
 import com.bots.telegrambotnutritionist.bot.service.manager.editor.EditorManager;
@@ -32,6 +33,7 @@ public class CallBackQueryHandler {
     final SubmitManager submitManager;
     final EditorManager editorManager;
     final AnswerManager answerManager;
+    final AdminManager adminManager;
     @Autowired
     public CallBackQueryHandler(AuthManager authManager,
                                 SupportManager supportManager,
@@ -41,7 +43,8 @@ public class CallBackQueryHandler {
                                 MenuManager menuManager,
                                 SubmitManager submitManager,
                                 EditorManager editorManager,
-                                AnswerManager answerManager
+                                AnswerManager answerManager,
+                                AdminManager adminManager
     ) {
         this.authManager = authManager;
         this.supportManager = supportManager;
@@ -52,6 +55,7 @@ public class CallBackQueryHandler {
         this.submitManager = submitManager;
         this.editorManager = editorManager;
         this.answerManager = answerManager;
+        this.adminManager = adminManager;
     }
 
     public BotApiMethod<?> answer(CallbackQuery callBackQuery, Bot bot) {
@@ -72,6 +76,12 @@ public class CallBackQueryHandler {
             }
             case SUBMIT -> {
                 return submitManager.answerCallbackQuery(callBackQuery, bot);
+            }
+            case ADMIN -> {
+                return adminManager.answerCallbackQuery(callBackQuery, bot);
+            }
+            case WEBINARS -> {
+                return webinarManager.answerCallbackQuery(callBackQuery, bot);
             }
         }
         switch (callbackData) {

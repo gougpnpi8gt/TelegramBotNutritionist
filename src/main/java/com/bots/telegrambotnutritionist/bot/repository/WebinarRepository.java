@@ -7,4 +7,5 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface WebinarRepository extends JpaRepository<Webinar, Integer> {
     Webinar findByName(String nameWebinar);
+    Webinar findWebinarById(Integer id);
 }

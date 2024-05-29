@@ -1,7 +1,9 @@
 package com.bots.telegrambotnutritionist.bot.enity.person;
 
 import com.bots.telegrambotnutritionist.bot.enity.reviews.Reviews;
+import com.bots.telegrambotnutritionist.bot.enity.support.Support;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -22,54 +24,49 @@ public class Person {
 
     @Id
     @Column(name = "id")
-    Long id; // идентификатор чата для пользователя
+    Long id;
 
     @Column(name = "token",
             unique = true)
-    String token; // уникальный для каждого человека и его может будет поменять
+    String token;
 
     @Column(name = "name")
-    //@NotEmpty(message = "Имя не должно быть пустым")
-    //@Size(min = 2, max = 20, message = "Имя не больше 20 символов")
+    @Size(min = 2, max = 20, message = "Имя не больше 20 символов")
     String name;
 
     @Column(name = "sur_name")
-    //@Size(min = 2, max = 20, message = "Фамилия не больше 20 символов")
+    @Size(min = 2, max = 20, message = "Фамилия не больше 20 символов")
     String surName;
 
     @Column(name = "patronymic")
-    //@Size(min = 2, max = 20, message = "Отчество не больше 20 символов")
+    @Size(min = 2, max = 20, message = "Отчество не больше 20 символов")
     String patronymic;
 
     @Column(name = "age")
-    //@NotNull
-    //@Min(value = 0, message = "Возраст начинается от 0")
-   // @Max(value = 100, message = "Возраст не может быть больше 100 лет")
+    @PositiveOrZero
+    @Max(value = 100, message = "Возраст не может быть больше 100 лет")
     int age;
 
     @Enumerated(EnumType.STRING)
     Gender gender;
 
     @Column(name = "weight")
-    //@Min(value = 0, message = "Вес начинается от 0")
-    //@Max(value = 300, message = "Для ограничения ввода случайно большого числа.\\n " +
-   //         "Вес не может быть больше 300 кг")
+    @PositiveOrZero
+    @Max(value = 300, message = "Вес не может быть больше 300 кг")
     int weight;
 
     @Column(name = "birthday")
-    //@Temporal(TemporalType.TIMESTAMP)
+    @Temporal(TemporalType.DATE)
     LocalDate birthday;
 
     @Column(name = "country")
-   // @Size(min = 2, max = 20, message = "Не больше 20 символов")
-   // @NotEmpty(message = "Поле не должно быть пустым")
+    @Size(min = 2, max = 20, message = "Не больше 20 символов")
     String country;
 
     @Column(name = "characteristic")
-   // @Size(min = 2, max = 1000, message = "Описание не больше 1000 символов")
+    @Size(min = 2, max = 5000, message = "Описание не больше 5000 символов")
     String characteristicsOfAPerson;
 
-    //@Transient
     @Enumerated(EnumType.STRING)
     Action action;
 
@@ -79,19 +76,25 @@ public class Person {
     @OneToMany(mappedBy = "person")
     List<Reviews> reviews;
 
+    @OneToMany(mappedBy = "person")
+    List<Support> supports;
+
     @PrePersist
     private void generateUniqueToken() {
         if (token == null) {
             token = String.valueOf(UUID.randomUUID());
         }
     }
+    public void addSupport(Support support){
+        if (supports == null) {
+            supports = new ArrayList<>();
+        }
+        supports.add(support);
+    }
     public void addReviews(Reviews review) {
         if (reviews == null) {
             reviews = new ArrayList<>();
         }
         reviews.add(review);
-    }
-    public void refreshToken() {
-        token = String.valueOf(UUID.randomUUID());
     }
 }

@@ -1,5 +1,10 @@
 package com.bots.telegrambotnutritionist.bot.service.handler;
 
+import com.bots.telegrambotnutritionist.bot.enity.person.Action;
+import com.bots.telegrambotnutritionist.bot.enity.person.Person;
+import com.bots.telegrambotnutritionist.bot.enity.person.Role;
+import com.bots.telegrambotnutritionist.bot.repository.PersonRepository;
+import com.bots.telegrambotnutritionist.bot.service.factory.AnswerMethodFactory;
 import com.bots.telegrambotnutritionist.bot.service.manager.aboutMe.AboutMeManager;
 import com.bots.telegrambotnutritionist.bot.service.manager.admin.AdminManager;
 import com.bots.telegrambotnutritionist.bot.service.manager.answer.AnswerManager;
@@ -13,7 +18,6 @@ import com.bots.telegrambotnutritionist.bot.telegram.Bot;
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -24,9 +28,6 @@ import static com.bots.telegrambotnutritionist.bot.service.data.Command.*;
 @Service
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class CommandHandler {
-
-    @Value("${unique.chat}")
-    String chat;
     final SupportManager supportManager;
     final ReviewManager reviewManager;
     final WebinarManager webinarManager;
@@ -36,6 +37,8 @@ public class CommandHandler {
     final SubmitManager submitManager;
     final EditorManager editorManager;
     final AnswerManager answerManager;
+    final AnswerMethodFactory methodFactory;
+    final PersonRepository personRepository;
     @Autowired
     public CommandHandler(SupportManager supportManager,
                           ReviewManager reviewManager,
@@ -45,7 +48,9 @@ public class CommandHandler {
                           AdminManager adminManager,
                           SubmitManager submitManager,
                           EditorManager editorManager,
-                          AnswerManager answerManager
+                          AnswerManager answerManager,
+                          AnswerMethodFactory methodFactory,
+                          PersonRepository personRepository
     ) {
         this.reviewManager = reviewManager;
         this.webinarManager = webinarManager;
@@ -56,6 +61,8 @@ public class CommandHandler {
         this.submitManager = submitManager;
         this.editorManager = editorManager;
         this.answerManager = answerManager;
+        this.methodFactory = methodFactory;
+        this.personRepository = personRepository;
     }
 
     public BotApiMethod<?> answer(Message message, Bot bot) {
@@ -74,10 +81,17 @@ public class CommandHandler {
                 return aboutMeManager.answerCommand(message, bot);
             }
             case ADMIN -> {
-                if (isAuthorizedUser(message.getChatId())){
+                Long chatId = message.getChatId();
+                Person person = personRepository.findPersonById(chatId);
+                if (person.getRole().equals(Role.ADMIN)) {
                     return adminManager.answerCommand(message, bot);
                 } else {
-                    return errorAdmin(message);
+                    person.setAction(Action.ADMIN);
+                    personRepository.save(person);
+                    return methodFactory.getSendMessage(
+                            chatId,
+                            "Введите пароль",
+                            null);
                 }
             }
             case WEBINARS -> {
@@ -97,21 +111,10 @@ public class CommandHandler {
             }
         }
     }
-    private boolean isAuthorizedUser(Long chatId) {
-        return (chatId.toString().equals(chat));
-    }
 
     private BotApiMethod<?> defaultAnswer(Message message) {
         return SendMessage.builder().text("""
                         Неподдерживаемая команда
-                        """)
-                .chatId(message.getChatId())
-                .build();
-    }
-
-    private BotApiMethod<?> errorAdmin(Message message){
-        return SendMessage.builder().text("""
-                        Вы не администратор, вернитесь в меню
                         """)
                 .chatId(message.getChatId())
                 .build();

@@ -220,8 +220,10 @@ public class AnswerMethodFactory {
                 .chatId(chatId)
                 .video(new InputFile(
                         new File(path)
+                        // пример из чата: https://path.to/your/video.mp4"
                         )
                 )
+                .protectContent(true)
                 .caption(caption)
                 .replyMarkup(keyboard)
                 .build();
@@ -229,6 +231,7 @@ public class AnswerMethodFactory {
     public EditMessageMedia getEditMessageVideo(CallbackQuery callbackQuery, String path, InlineKeyboardMarkup keyboard){
         return EditMessageMedia.builder()
                 .chatId(callbackQuery.getMessage().getChatId())
+                .messageId(callbackQuery.getMessage().getMessageId())
                 .media(new InputMediaVideo(path))
                 .replyMarkup(keyboard)
                 .build();
